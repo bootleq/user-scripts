@@ -5,6 +5,7 @@
 // @version           1.0.0
 // @license           MIT
 // @author            bootleq
+// @namespace         bootleq.com
 // @homepageURL       https://github.com/bootleq/user-scripts
 //
 // @match             https://*.momoshop.com.tw/*
