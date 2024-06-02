@@ -156,6 +156,17 @@ const insertLoginForm = function () {
   // Submit 按鈕
   $div.querySelector('form').addEventListener('submit', e => {
     let data = new FormData(e.target);
+
+    // Chrome 不會自動偵測到登入，所以用 PasswordCredential 要求儲存；
+    // Firefox 目前 (126.0.1) 未支援 PasswordCredential
+    if ('PasswordCredential' in window) {
+      const cred = {
+        id: data.get('id'),
+        password: data.get('password')
+      };
+      navigator.credentials.store(new PasswordCredential(cred));
+    }
+
     doLogin(data.get('id'), data.get('password'));
     destroy();
   });
