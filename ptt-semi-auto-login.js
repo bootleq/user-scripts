@@ -209,4 +209,4 @@ const onInit = function () {
   });
 };
 
-window.addEventListener('DOMContentLoaded', onInit);
+onInit();
