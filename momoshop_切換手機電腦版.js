@@ -2,7 +2,7 @@
 // @name              momoshop.com.tw 切換手機／電腦版
 // @description       Add link button to specific pages, to switch between mobile/desktop site
 // @description:zh-TW 在特定網頁增加連結按鈕，以切換至手機／電腦版網站
-// @version           1.0.0
+// @version           1.0.1
 // @license           MIT
 // @author            bootleq
 // @namespace         bootleq.com
