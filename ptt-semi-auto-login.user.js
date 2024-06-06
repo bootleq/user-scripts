@@ -19,14 +19,14 @@
 // https://greasyfork.org/zh-TW/scripts/372391-pttchrome-term-ptt-cc-add-on
 // https://hidde.blog/making-password-managers-play-ball-with-your-login-form/
 
-const loginQuestionClass = 'q7 b0';
-const loginQuestionText = '請輸入代號，或以 guest 參觀，或以 new 註冊: '; // 注意末尾有空白
-const findQuestionTimeout = 6000;
-const containerId = 'PTTSemiLogin';
-const dialogHeader = '標準表單登入';
-const hideIcon = '--';
-const closeIcon = '✖';
-const messagePrefix = containerId;
+const loginQuestionClass = 'q7 b0';   // 登入頁訊息的 className
+const loginQuestionText = '請輸入代號，或以 guest 參觀，或以 new 註冊: '; // 登入頁訊息的文字（注意包含末尾空白）
+const findQuestionTimeout = 6000;     // 偵測登入頁的等待時間（ms），逾時則放棄
+const containerId = 'PTTSemiLogin';   // 插入表單的 HTML id
+const dialogHeader = '標準表單登入';  // 插入表單的標題文字
+const hideIcon = '--';                // 插入表單的「暫時隱藏」按鈕文字
+const closeIcon = '✖';                // 插入表單的「關閉」按鈕文字
+const messagePrefix = containerId;    // 使用 console.log 時的固定訊息開頭
 
 const formHTML = `
   <dialog>
