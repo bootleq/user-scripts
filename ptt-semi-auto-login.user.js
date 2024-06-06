@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              PTT 半自動登入
 // @description       在登入畫面顯示獨立的密碼表單，以沿用瀏覽器內建密碼功能登入
-// @version           1.0.0
+// @version           1.0.1
 // @license           MIT
 // @author            bootleq
 // @namespace         bootleq.com
