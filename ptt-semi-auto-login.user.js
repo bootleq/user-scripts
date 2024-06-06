@@ -154,6 +154,8 @@ const insertLoginForm = function () {
     $div.addEventListener(eventName, stopPropagation);
   });
 
+  $dialog.addEventListener('close', destroy);
+
   // Submit 按鈕
   $div.querySelector('form').addEventListener('submit', e => {
     let data = new FormData(e.target);
@@ -175,7 +177,6 @@ const insertLoginForm = function () {
   // Close 按鈕
   $div.querySelector('button[data-action="close"]').addEventListener('click', () => {
     $dialog.close();
-    destroy();
   });
 
   // Hide 按鈕
