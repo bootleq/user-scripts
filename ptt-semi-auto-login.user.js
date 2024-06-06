@@ -218,7 +218,7 @@ const destroy = function () {
 };
 
 const onInit = function () {
-  waitLoginPage(500, 5000).then(() => {
+  waitLoginPage(500, findQuestionTimeout).then(() => {
     insertStyle(globalStyle);
     let dialog = insertLoginForm();
     dialog.showModal();
