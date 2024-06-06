@@ -26,7 +26,7 @@ const containerId = 'PTTSemiLogin';
 const dialogHeader = '標準表單登入';
 const hideIcon = '--';
 const closeIcon = '✖';
-const messagePrefix = `[${containerId}] `;
+const messagePrefix = containerId;
 
 const formHTML = `
   <dialog>
@@ -168,7 +168,7 @@ const insertLoginForm = function () {
         };
         navigator.credentials.store(new PasswordCredential(cred));
       } else {
-        console.log(`${messagePrefix}`, '瀏覽器不支援 PasswordCredential，可能無法記憶密碼');
+        log('瀏覽器不支援 PasswordCredential，可能無法記憶密碼');
       }
     }
 
@@ -199,6 +199,10 @@ const insertStyle = function (css) {
   head.appendChild(style);
 };
 
+const log = function (...args) {
+  console.log(`[${messagePrefix}]`, ...args);
+};
+
 const needPasswordCredential = function () {
   // Chrome 不會自動偵測到登入，所以「需要」用 PasswordCredential 要求儲存；
   // Firefox 目前 (126.0.1) 未支援 PasswordCredential，未來也許能統一作法
@@ -219,7 +223,7 @@ const onInit = function () {
     let dialog = insertLoginForm();
     dialog.showModal();
   }).catch(() => {
-    console.log(`${messagePrefix}`, '找不到「請輸入代號...」文字，放棄登入');
+    log('找不到「請輸入代號...」文字，放棄登入');
   });
 };
 
