@@ -160,14 +160,16 @@ const insertLoginForm = function () {
   $div.querySelector('form').addEventListener('submit', e => {
     let data = new FormData(e.target);
 
-    // Chrome 不會自動偵測到登入，所以用 PasswordCredential 要求儲存；
-    // Firefox 目前 (126.0.1) 未支援 PasswordCredential
-    if ('PasswordCredential' in window) {
-      const cred = {
-        id: data.get('id'),
-        password: data.get('password')
-      };
-      navigator.credentials.store(new PasswordCredential(cred));
+    if (needPasswordCredential()) {
+      if ('PasswordCredential' in window) {
+        const cred = {
+          id: data.get('id'),
+          password: data.get('password')
+        };
+        navigator.credentials.store(new PasswordCredential(cred));
+      } else {
+        console.log(`${messagePrefix}`, '瀏覽器不支援 PasswordCredential，可能無法記憶密碼');
+      }
     }
 
     doLogin(data.get('id'), data.get('password'));
@@ -195,6 +197,16 @@ const insertStyle = function (css) {
   style.type = 'text/css';
   style.innerHTML = css;
   head.appendChild(style);
+};
+
+const needPasswordCredential = function () {
+  // Chrome 不會自動偵測到登入，所以「需要」用 PasswordCredential 要求儲存；
+  // Firefox 目前 (126.0.1) 未支援 PasswordCredential，未來也許能統一作法
+  if (GM_info?.platform?.name === 'firefox' || navigator.userAgent.includes('Firefox')) {
+    return false;
+  }
+
+  return true;
 };
 
 const destroy = function () {
