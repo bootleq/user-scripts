@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              PTT 半自動登入
 // @description       在登入畫面顯示獨立的密碼表單，以沿用瀏覽器內建密碼功能登入
-// @version           1.0.1
+// @version           1.1.0
 // @license           MIT
 // @author            bootleq
 // @namespace         bootleq.com
@@ -21,6 +21,7 @@
 
 const loginQuestionClass = 'q7 b0';   // 登入頁訊息的 className
 const loginQuestionText = '請輸入代號，或以 guest 參觀，或以 new 註冊: '; // 登入頁訊息的文字（注意包含末尾空白）
+const disconnAlertText = '你斷線了!'; // 登入頁斷線提示框的文字（偵測用）
 const findQuestionTimeout = 6000;     // 偵測登入頁的等待時間（ms），逾時則放棄
 const containerId = 'PTTSemiLogin';   // 插入表單的 HTML id
 const dialogHeader = '標準表單登入';  // 插入表單的標題文字
@@ -37,15 +38,18 @@ const formHTML = `
         <button data-action="close" type="button">${closeIcon}</button>
       </div>
     </div>
+    <div class='hint-for-disconnected' style='display: none'>已斷線，請連線後再試</div>
     <form method="dialog">
-      <label>
-        代號
-        <input type="text" name="id" autocomplete="username" required autofocus>
-      </label>
-      <label>
-        密碼
-        <input type="password" name="password" autocomplete="current-password" required>
-      </label>
+      <fieldset>
+        <label>
+          代號
+          <input type="text" name="id" autocomplete="username" required autofocus>
+        </label>
+        <label>
+          密碼
+          <input type="password" name="password" autocomplete="current-password" required>
+        </label>
+      </fieldset>
 
       <button>送出</button>
     </form>
@@ -84,6 +88,10 @@ const globalStyle = `
     opacity: 0.6;
   }
 
+  #${containerId} fieldset {
+    display: inline-block;
+  }
+
   #${containerId} label {
     margin-right: 8px;
     font-weight: normal;
@@ -91,6 +99,16 @@ const globalStyle = `
 
   #${containerId} label > input {
     margin: 0 4px;
+  }
+
+  #${containerId} .hint-for-disconnected {
+    padding: 0.5em;
+    margin: -0.8em 1em 1.2em;
+    font-size: larger;
+    font-weight: bold;
+    text-align: center;
+    background-color: black;
+    color: red;
   }
 `;
 
@@ -140,6 +158,15 @@ const doLogin = function (id, password) {
   sendEnter($t);
 };
 
+const hasDisconnected = () => {
+  const topAlert = document.querySelector('#reactAlert');
+  return (topAlert && topAlert.querySelector('h4')?.textContent === disconnAlertText);
+};
+
+const hintForDisconnected = ($dialog) => {
+  $dialog.querySelector('.hint-for-disconnected').style.display = 'block';
+};
+
 const insertLoginForm = function () {
   const $div = document.createElement('div');
   $div.innerHTML = formHTML;
@@ -158,6 +185,12 @@ const insertLoginForm = function () {
 
   // Submit 按鈕
   $div.querySelector('form').addEventListener('submit', e => {
+    if (hasDisconnected()) {
+      hintForDisconnected($dialog);
+      e.preventDefault();
+      return;
+    }
+
     let data = new FormData(e.target);
 
     if (needPasswordCredential()) {
