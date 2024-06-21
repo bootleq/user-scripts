@@ -103,8 +103,8 @@ const onNavigate = () => {
 
     waitFor(getRequireFunction, gLoadInterval, gLoadTimeout).then(delayFeedStale);
 
-    if ('navitation' in pageWin) {
-      pageWin.removeEventListener("navigatesuccess", onNavigate);
+    if ('navigation' in pageWin) {
+      navigation.removeEventListener("navigatesuccess", onNavigate);
     } else {
       // Won't fix.
       // history `pushState` and `replaceState` hijack are not reversed
@@ -113,8 +113,8 @@ const onNavigate = () => {
 };
 
 const watchNavigation = () => {
-  if ('navitation' in pageWin) {
-    pageWin.addEventListener("navigatesuccess", onNavigate);
+  if ('navigation' in pageWin) {
+    navigation.addEventListener("navigatesuccess", onNavigate);
     return;
   }
 
@@ -151,6 +151,6 @@ onNavigate();
 
 if (!isHomeVisited) {
   // Though auto-refresh only occur on News Feed,
-  // watch navitation for case that enter "/" from other paths like "/help".
+  // watch navigation for case that enter "/" from other paths like "/help".
   watchNavigation();
 }
