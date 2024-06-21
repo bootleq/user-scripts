@@ -56,6 +56,18 @@ const waitFor = (condition, interval, timeout) => {
   });
 };
 
+const hijackFunction = (fn, callback) => {
+  const oldFn = exportFunction(fn, pageWin);
+
+  function newFn (...args) {
+    const result = oldFn.apply(this, args);
+    callback();
+    return result;
+  }
+
+  return exportFunction(newFn, pageWin);
+};
+
 // Detect the global function really named 'require'
 const getRequireFunction = () => (typeof pageWin.require === 'function');
 
@@ -108,22 +120,8 @@ const watchNavigation = () => {
 
   // Firefox only, see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Sharing_objects_with_page_scripts#sharing_content_script_objects_with_page_scripts
   if (typeof exportFunction === 'function') {
-    const oldPush = exportFunction(pageWin.history.pushState, pageWin);
-    const oldReplace = exportFunction(pageWin.history.replaceState, pageWin);
-
-    function newPush (...args) {
-      const result = oldPush.apply(this, args);
-      onNavigate();
-      return result;
-    }
-    function newReplace (...args) {
-      const result = oldReplace.apply(this, args);
-      onNavigate();
-      return result;
-    }
-
-    pageWin.history.pushState = exportFunction(newPush, pageWin);
-    pageWin.history.replaceState = exportFunction(newReplace, pageWin);
+    pageWin.history.pushState = hijackFunction(pageWin.history.pushState, onNavigate);
+    pageWin.history.replaceState = hijackFunction(pageWin.history.replaceState, onNavigate);
   } else {
     log('Lack support of navigation watching event, aborted.')
   }
