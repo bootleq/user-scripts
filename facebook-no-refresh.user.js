@@ -103,20 +103,29 @@ const onNavigate = () => {
 const watchNavigation = () => {
   if ('navitation' in pageWin) {
     pageWin.addEventListener("navigatesuccess", onNavigate);
-  } else {
-    const oldPush = pageWin.history.pushState;
-    const oldReplace = pageWin.history.replaceState;
+    return;
+  }
 
-    pageWin.history.pushState = function (...args) {
+  // Firefox only, see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Sharing_objects_with_page_scripts#sharing_content_script_objects_with_page_scripts
+  if (typeof exportFunction === 'function') {
+    const oldPush = exportFunction(pageWin.history.pushState, pageWin);
+    const oldReplace = exportFunction(pageWin.history.replaceState, pageWin);
+
+    function newPush (...args) {
       const result = oldPush.apply(this, args);
       onNavigate();
       return result;
-    };
-    pageWin.history.replaceState = function (...args) {
+    }
+    function newReplace (...args) {
       const result = oldReplace.apply(this, args);
       onNavigate();
       return result;
-    };
+    }
+
+    pageWin.history.pushState = exportFunction(newPush, pageWin);
+    pageWin.history.replaceState = exportFunction(newReplace, pageWin);
+  } else {
+    log('Lack support of navigation watching event, aborted.')
   }
 };
 
