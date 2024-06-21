@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              Facebook 不要自動重新整理
 // @description       抵抗臉書首頁（動態消息）自動重整的行為
-// @version           1.0.0
+// @version           1.0.1
 // @license           MIT
 // @author            bootleq
 // @namespace         bootleq.com
