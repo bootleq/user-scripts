@@ -85,6 +85,8 @@ const delayFeedStale = () => {
 
     const oldValue = JSON.stringify(m);
     m.FEED_STALE_TIMEOUT = gFeedStaleTimeout;
+    m.FEED_VISIBILITY_TIMEOUT = gFeedStaleTimeout;
+    // m.FEED_MAX_QUERY_AGE_IN_SEC = gFeedStaleTimeout;
     m.BADGE_STALE_TIMEOUT = gFeedStaleTimeout;
     log(`CometFeedStalenessConstants updated:\n  ${oldValue} =>\n  ${JSON.stringify(m)}.`);
   } catch (error) {
