@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              Facebook 不要自動重新整理
 // @description       抵抗臉書首頁（動態消息）自動重整的行為
-// @version           1.0.1
+// @version           1.1.0
 // @license           MIT
 // @author            bootleq
 // @namespace         bootleq.com
@@ -78,6 +78,7 @@ const delayFeedStale = () => {
     if (
       typeof m !== 'object' ||
       typeof m.FEED_STALE_TIMEOUT !== 'number' ||
+      typeof m.FEED_VISIBILITY_TIMEOUT !== 'number' ||
       typeof m.BADGE_STALE_TIMEOUT !== 'number'
     ) {
       throw new Error('Unexpected shape of CometFeedStalenessConstants');
