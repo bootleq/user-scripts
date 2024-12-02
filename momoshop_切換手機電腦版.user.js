@@ -131,7 +131,19 @@ const routes = {
       name: 'goods',
       path: '/goods.momo',
       key:  'i_code'
-    }
+    },
+    {
+      name: 'category',
+      path: '/category.momo',
+      key:  'cn',
+      to: 'categoryD',
+    },
+    {
+      name: 'cateGoods',
+      path: '/cateGoods.momo',
+      key:  'cn',
+      to: 'categoryD',
+    },
   ],
   desktop: [
     {
@@ -143,7 +155,25 @@ const routes = {
       name: 'goods',
       path: '/goods/GoodsDetail.jsp',
       key:  'i_code'
-    }
+    },
+    {
+      name: 'categoryL',
+      path: '/category/LgrpCategory.jsp',
+      key:  'l_code',
+      to: 'category',
+    },
+    {
+      name: 'categoryD',
+      path: '/category/DgrpCategory.jsp',
+      key:  'd_code',
+      to: 'category',
+    },
+    {
+      name: 'categoryM',
+      path: '/category/MgrpCategory.jsp',
+      key:  'm_code',
+      to: 'category',
+    },
   ]
 };
 
@@ -164,7 +194,7 @@ const adapterURL = function (url, route, view) {
     console.error(`解析網址失敗，缺少 ${route.key} 參數`);
   }
 
-  const toRoute = findRouteByName(toView, route.name);
+  const toRoute = findRouteByName(toView, route.to || route.name);
 
   // NOTE: don't try to keep params like below, the result URL usually not work
   // params.delete(route.key);
