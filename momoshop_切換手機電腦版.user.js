@@ -14,11 +14,14 @@
 
 const detectMobile = true; // 啟用轉換 手機 → 桌面版
 const detectDesktop = false; // 啟用轉換 桌面 → 手機版
+const detectTP = true; // 啟用偵測 店+
+
+const TPToggleWidth = 'clamp(375px, 100vw, 960px)'; // 店+ 按下按鈕時，調整網頁內容（body 等）到指定寬度
 
 const adapterHTML = function (url, text) {
   return `
       <span>👀</span>
-      <a href="${url}">${text}</a>
+      <a ${url ? `href="${url}"` : `onclick="document.documentElement.classList.toggle('${adapterClass}-tp-fix')"`}>${text}</a>
       <button onclick="console.log(this.parentNode.style.display = 'none')">✖</button>`;
 };
 
@@ -55,10 +58,18 @@ const globalStyle = `
 
   .${adapterClass} > button {
     cursor: pointer;
+    color: black;
     background: none;
     border: none;
     margin: 0 20px 0 10px;
     font-size: x-large;
+  }
+
+  html.${adapterClass}-tp-fix,
+  html.${adapterClass}-tp-fix body,
+  html.${adapterClass}-tp-fix body > div > .fixed.w-full {
+    max-width: ${TPToggleWidth};
+    margin-inline: auto;
   }
 
   @keyframes ${adapterClass}-breathing {
@@ -89,7 +100,8 @@ const hosts = {
 
 const adapterText = {
   mobile: '切換至桌面版',
-  desktop: '切換至手機版'
+  desktop: '切換至手機版',
+  tp: '店+ 沒有桌面版',
 };
 
 const routes = {
@@ -164,9 +176,21 @@ const insertStyle = function (css) {
 
 const onInit = function () {
   const url = new URL(window.location);
-  const view = url.host.startsWith('m.') ? 'mobile' : 'desktop';
+  const view = url.host.startsWith('m.') ?
+    'mobile' :
+    (url.pathname.startsWith('/TP/') ? 'tp' : 'desktop');
 
-  if (view === 'mobile' && !detectMobile || view === 'desktop' && !detectDesktop) {
+  if (
+    view === 'mobile' && !detectMobile ||
+    view === 'desktop' && !detectDesktop ||
+    view === 'tp' && !detectTP
+  ) {
+    return;
+  }
+
+  if (view === 'tp') {
+    insertStyle(globalStyle);
+    insertAdapter('', adapterText[view]);
     return;
   }
 
