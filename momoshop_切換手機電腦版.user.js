@@ -50,6 +50,16 @@ const globalStyle = `
     margin-top: -4px;
   }
 
+  .${adapterClass}-view-tp > span::before {
+    content: '﹀';
+    color: black;
+    display: block;
+    position: absolute;
+    top: 4px;
+    left: 3px;
+    transform: scaleX(1.4);
+  }
+
   .${adapterClass} > a {
     color: white;
     padding: 1em 0 1em 22px;
@@ -158,11 +168,14 @@ const adapterURL = function (url, route, view) {
   return `https://${hosts[toView]}${toRoute.path}?${toRoute.key}=${id}`;
 };
 
-const insertAdapter = function (url, text) {
+const insertAdapter = function (url, view) {
   const target = document.querySelector('body');
   const $div = document.createElement('div');
+  const text = adapterText[view];
+
   $div.innerHTML = adapterHTML(url, text);
   $div.classList.add(adapterClass);
+  $div.classList.add(`${adapterClass}-view-${view}`);
   return target.appendChild($div);
 }
 
@@ -190,7 +203,7 @@ const onInit = function () {
 
   if (view === 'tp') {
     insertStyle(globalStyle);
-    insertAdapter('', adapterText[view]);
+    insertAdapter('', view);
     return;
   }
 
@@ -199,7 +212,7 @@ const onInit = function () {
   if (route) {
     insertStyle(globalStyle);
     const newURL = adapterURL(url, route, view);
-    insertAdapter(newURL, adapterText[view]);
+    insertAdapter(newURL, view);
   } else {
     console.log('未支援的網址');
   }
