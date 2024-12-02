@@ -71,7 +71,7 @@ const globalStyle = `
     color: black;
     background: none;
     border: none;
-    margin: 0 20px 0 10px;
+    margin: 0 20px 0 25px;
     font-size: x-large;
   }
 
