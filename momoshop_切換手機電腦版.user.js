@@ -63,7 +63,13 @@ const globalStyle = `
   .${adapterClass} > a {
     color: white;
     padding: 1em 0 1em 22px;
+    margin-inline: 0;
     text-shadow: 1px 1px 1px #333;
+    transition: margin 10s ease-in-out;
+  }
+
+  .${adapterClass} > a:active {
+    margin-inline: clamp(10em, 42vw, 64em);
   }
 
   .${adapterClass} > button {
