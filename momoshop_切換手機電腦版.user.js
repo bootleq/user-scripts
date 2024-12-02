@@ -2,7 +2,7 @@
 // @name              momoshop.com.tw 切換手機／電腦版
 // @description       Add link button to specific pages, to switch between mobile/desktop site
 // @description:zh-TW 在特定網頁增加連結按鈕，以切換至手機／電腦版網站
-// @version           1.0.1
+// @version           1.1.0
 // @license           MIT
 // @author            bootleq
 // @namespace         bootleq.com
@@ -14,11 +14,14 @@
 
 const detectMobile = true; // 啟用轉換 手機 → 桌面版
 const detectDesktop = false; // 啟用轉換 桌面 → 手機版
+const detectTP = true; // 啟用偵測 店+
+
+const TPToggleWidth = 'clamp(375px, 100vw, 960px)'; // 店+ 按下按鈕時，調整網頁內容（body 等）到指定寬度
 
 const adapterHTML = function (url, text) {
   return `
       <span>👀</span>
-      <a href="${url}">${text}</a>
+      <a ${url ? `href="${url}"` : `onclick="document.documentElement.classList.toggle('${adapterClass}-tp-fix')"`}>${text}</a>
       <button onclick="console.log(this.parentNode.style.display = 'none')">✖</button>`;
 };
 
@@ -47,18 +50,42 @@ const globalStyle = `
     margin-top: -4px;
   }
 
+  .${adapterClass}-view-tp > span::before {
+    content: '﹀';
+    color: black;
+    display: block;
+    position: absolute;
+    top: 4px;
+    left: 3px;
+    transform: scaleX(1.4);
+  }
+
   .${adapterClass} > a {
     color: white;
     padding: 1em 0 1em 22px;
+    margin-inline: 0;
     text-shadow: 1px 1px 1px #333;
+    transition: margin 10s ease-in-out;
+  }
+
+  .${adapterClass} > a:active {
+    margin-inline: clamp(10em, 42vw, 64em);
   }
 
   .${adapterClass} > button {
     cursor: pointer;
+    color: black;
     background: none;
     border: none;
-    margin: 0 20px 0 10px;
+    margin: 0 20px 0 25px;
     font-size: x-large;
+  }
+
+  html.${adapterClass}-tp-fix,
+  html.${adapterClass}-tp-fix body,
+  html.${adapterClass}-tp-fix body > div > .fixed.w-full {
+    max-width: ${TPToggleWidth};
+    margin-inline: auto;
   }
 
   @keyframes ${adapterClass}-breathing {
@@ -89,7 +116,8 @@ const hosts = {
 
 const adapterText = {
   mobile: '切換至桌面版',
-  desktop: '切換至手機版'
+  desktop: '切換至手機版',
+  tp: '店+ 沒有桌面版',
 };
 
 const routes = {
@@ -103,7 +131,19 @@ const routes = {
       name: 'goods',
       path: '/goods.momo',
       key:  'i_code'
-    }
+    },
+    {
+      name: 'category',
+      path: '/category.momo',
+      key:  'cn',
+      to: 'categoryD',
+    },
+    {
+      name: 'cateGoods',
+      path: '/cateGoods.momo',
+      key:  'cn',
+      to: 'categoryD',
+    },
   ],
   desktop: [
     {
@@ -115,7 +155,25 @@ const routes = {
       name: 'goods',
       path: '/goods/GoodsDetail.jsp',
       key:  'i_code'
-    }
+    },
+    {
+      name: 'categoryL',
+      path: '/category/LgrpCategory.jsp',
+      key:  'l_code',
+      to: 'category',
+    },
+    {
+      name: 'categoryD',
+      path: '/category/DgrpCategory.jsp',
+      key:  'd_code',
+      to: 'category',
+    },
+    {
+      name: 'categoryM',
+      path: '/category/MgrpCategory.jsp',
+      key:  'm_code',
+      to: 'category',
+    },
   ]
 };
 
@@ -136,7 +194,7 @@ const adapterURL = function (url, route, view) {
     console.error(`解析網址失敗，缺少 ${route.key} 參數`);
   }
 
-  const toRoute = findRouteByName(toView, route.name);
+  const toRoute = findRouteByName(toView, route.to || route.name);
 
   // NOTE: don't try to keep params like below, the result URL usually not work
   // params.delete(route.key);
@@ -146,11 +204,14 @@ const adapterURL = function (url, route, view) {
   return `https://${hosts[toView]}${toRoute.path}?${toRoute.key}=${id}`;
 };
 
-const insertAdapter = function (url, text) {
+const insertAdapter = function (url, view) {
   const target = document.querySelector('body');
   const $div = document.createElement('div');
+  const text = adapterText[view];
+
   $div.innerHTML = adapterHTML(url, text);
   $div.classList.add(adapterClass);
+  $div.classList.add(`${adapterClass}-view-${view}`);
   return target.appendChild($div);
 }
 
@@ -164,9 +225,21 @@ const insertStyle = function (css) {
 
 const onInit = function () {
   const url = new URL(window.location);
-  const view = url.host.startsWith('m.') ? 'mobile' : 'desktop';
+  const view = url.host.startsWith('m.') ?
+    'mobile' :
+    (url.pathname.startsWith('/TP/') ? 'tp' : 'desktop');
 
-  if (view === 'mobile' && !detectMobile || view === 'desktop' && !detectDesktop) {
+  if (
+    view === 'mobile' && !detectMobile ||
+    view === 'desktop' && !detectDesktop ||
+    view === 'tp' && !detectTP
+  ) {
+    return;
+  }
+
+  if (view === 'tp') {
+    insertStyle(globalStyle);
+    insertAdapter('', view);
     return;
   }
 
@@ -175,7 +248,7 @@ const onInit = function () {
   if (route) {
     insertStyle(globalStyle);
     const newURL = adapterURL(url, route, view);
-    insertAdapter(newURL, adapterText[view]);
+    insertAdapter(newURL, view);
   } else {
     console.log('未支援的網址');
   }
