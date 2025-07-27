@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name              報導者優蛇
-// @description       報導者網站 使用者介面補強
+// @description       報導者網站使用者介面調整
 // @version           1.0.0
 // @license           MIT
 // @author            bootleq
@@ -33,18 +33,7 @@ const noAutoFocusSearchBar = () => {
         mutation.addedNodes.forEach(node => {
           if (node.nodeType === Node.ELEMENT_NODE) {
             const bar = node.matches(gSearchBarSelector) ? node : node.querySelector(gSearchBarSelector);
-
-            // 直接 blur，因其他方式（autofocus 屬性、focus / blur 事件）不可靠
             if (bar) {
-              // if (bar.autofocus || bar.hasAttribute('autofocus')) {
-              //   console.log('HAS autofocus');
-              // }
-              // bar.addEventListener('focus', () => {
-              //   console.log('HAS focus event');
-              // });
-              // bar.addEventListener('blur', () => {
-              //   console.log('HAS blur event', window.scrollY);
-              // });
               bar.blur();
             }
           }
