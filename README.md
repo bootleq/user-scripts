@@ -22,3 +22,9 @@
 延後動態消息自動重整的時間。 採用內部實作細節，可能隨時壞掉。<br>
 → [blog post](https://bootleq.blogspot.com/2024/06/facebook-no-auto-refresh-user-script.html "Facebook（網頁）自動重整對策 - 沒穿方服")
 | [更新記錄](/facebook-no-refresh.user.js.CHANGES.md)
+
+
+## 報導者優蛇
+
+報導者介面改善：目前只處理文章用 <kbd>PageDown</kbd> 或 <kbd>End</kbd> 有時無法捲動頁面的問題。<br>
+→ [更新記錄](/twreporter-user.user.js.CHANGES.md)
