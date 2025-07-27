@@ -50,7 +50,7 @@ const noAutoFocusSearchBar = () => {
     }
   );
 
-  setTimeout(observer.disconnect, gSearchBarObserveTimeout);
+  setTimeout(() => observer.disconnect(), gSearchBarObserveTimeout);
 };
 
 noAutoFocusSearchBar();
