@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name         APATW 解除滑鼠限制
-// @description  解除 www.apatw.org（中華民國保護動物協會）網站的滑鼠選取和右鍵選單限制
+// @name         APATW 解除操作限制
+// @description  解除 www.apatw.org（中華民國保護動物協會）網站的文字選取、右鍵選單限制
 // @version      1.0.0
 // @license      MIT
 // @author       bootleq
