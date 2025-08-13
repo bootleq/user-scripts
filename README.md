@@ -34,4 +34,4 @@
 ## APATW UI 解鎖
 
 解開 APATW（中華民國保護動物協會）網站對使用者操作的限制（文字選取、右鍵選單）。<br>
-| [更新記錄](/apatw-ui-block.user.js.CHANGES.md)
+→ [更新記錄](/apatw-ui-block.user.js.CHANGES.md)
