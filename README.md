@@ -29,3 +29,9 @@
 報導者介面調整：目前只有處理文章用 <kbd>PageDown</kbd> 或 <kbd>End</kbd> 有時無法捲動頁面的問題。<br>
 → [blog post](https://bootleq.blogspot.com/2025/07/twreporter-article-scroll-focus-problem-user-script.html "報導者文章無法用 End 捲動的問題，user script - 沒穿方服")
 | [更新記錄](/twreporter-user.user.js.CHANGES.md)
+
+
+## APATW UI 解鎖
+
+解開 APATW（中華民國保護動物協會）網站對使用者操作的限制（文字選取、右鍵選單）。<br>
+| [更新記錄](/apatw-ui-block.user.js.CHANGES.md)
