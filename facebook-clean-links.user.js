@@ -114,6 +114,9 @@ function init() {
             }
           }
         });
+      } else if (mutation.type === 'attributes' && mutation.target.matches(linkSelector)) {
+        const link = mutation.target;
+        mutateLink(link);
       }
     }
   });
@@ -121,6 +124,8 @@ function init() {
   observer.observe(
     document.body,
     {
+      attributes: true,
+      attributeFilter: ['href'],
       childList: true,
       subtree: true
     }
