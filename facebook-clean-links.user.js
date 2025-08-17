@@ -11,8 +11,6 @@
 // @run-at         document-idle
 // @grant          none
 // @noframes
-//
-// @require        https://cdnjs.cloudflare.com/ajax/libs/sentinel-js/0.0.7/sentinel.min.js
 // ==/UserScript==
 
 // Target behaviors:
@@ -104,7 +102,29 @@ function removeEventHandlers() {
 
 function init() {
   removeEventHandlers();
-  sentinel.on(linkSelector, mutateLink);
+
+  const observer = new MutationObserver((mutationsList) => {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+        mutation.addedNodes.forEach(node => {
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            const link = node.matches(linkSelector) ? node : node.querySelector(linkSelector);
+            if (link) {
+              mutateLink(link);
+            }
+          }
+        });
+      }
+    }
+  });
+
+  observer.observe(
+    document.body,
+    {
+      childList: true,
+      subtree: true
+    }
+  );
 }
 
 init();
