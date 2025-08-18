@@ -36,15 +36,15 @@ const unwantedParams = [
 // Known FB domains, to determine if a link is external
 const fbDomains = ['www.facebook.com']
 
-const linkSelector = 'a[role="link"][href]';
+const linkSelector = 'a[role="link"][href^="http"]';
 
 const unwantedEvents = [
   'contextmenu',
   'click',
 ];
 
-function isExternalOrTracking(link) {
-  const domain = (new URL(link)).hostname;
+function isExternalOrTracking(href) {
+  const domain = (new URL(href)).hostname;
   return !fbDomains.includes(domain);
 }
 
@@ -68,7 +68,7 @@ function stopPropagation(event) {
   const el = event.target;
   const link = el.closest(linkSelector);
 
-  if (link) {
+  if (link && isExternalOrTracking(link.href)) {
     event.stopPropagation();
     event.stopImmediatePropagation();
   }
