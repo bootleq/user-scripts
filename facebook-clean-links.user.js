@@ -103,6 +103,8 @@ function removeEventHandlers() {
 function init() {
   removeEventHandlers();
 
+  document.querySelectorAll(linkSelector).forEach(mutateLink);
+
   const observer = new MutationObserver((mutationsList) => {
     for (const mutation of mutationsList) {
       if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
