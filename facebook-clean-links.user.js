@@ -67,6 +67,12 @@ function cleanupURL(url) {
 function stopPropagation(event) {
   const el = event.target;
   const link = el.closest(linkSelector);
+  const btn = el.closest('[role="button"]')
+
+  if (btn) {
+    // console.log('👌 forgive button', btn, el);
+    return;
+  }
 
   if (link && isExternalOrTracking(link.href)) {
     event.stopPropagation();
