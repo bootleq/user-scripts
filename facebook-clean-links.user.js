@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           Facebook 乾淨連結
 // @description    清除臉書為外部連結附加的轉址等處理
-// @version        0.0.1
+// @version        1.0.0
 // @license        MIT
 // @author         bootleq
 // @namespace      bootleq.com
