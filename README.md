@@ -27,8 +27,9 @@
 ## Facebook 乾淨連結
 
 移除外部連結被添加的轉址 (`l.facebook.com/l.php?u=`) 和追蹤參數 (`?fbclid=`)<br>
-→ 替代方案：[ClearURLs][] <br>
+→ [blog post](https://bootleq.blogspot.com/2025/09/facebook-clean-links-user-script.html " Facebook 乾淨連結 user script - 沒穿方服")
 | [更新記錄](/facebook-clean-links.user.js.CHANGES.md)
+| 替代方案 [ClearURLs][]
 
 
 ## 報導者優蛇
