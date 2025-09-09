@@ -24,6 +24,13 @@
 | [更新記錄](/facebook-no-refresh.user.js.CHANGES.md)
 
 
+## Facebook 乾淨連結
+
+移除外部連結被添加的轉址 (`l.facebook.com/l.php?u=`) 和追蹤參數 (`?fbclid=`)<br>
+→ 替代方案：[ClearURLs][] <br>
+| [更新記錄](/facebook-clean-links.user.js.CHANGES.md)
+
+
 ## 報導者優蛇
 
 報導者介面調整：目前只有處理文章用 <kbd>PageDown</kbd> 或 <kbd>End</kbd> 有時無法捲動頁面的問題。<br>
@@ -35,3 +42,7 @@
 
 解開 APATW（中華民國保護動物協會）網站對使用者操作的限制（文字選取、右鍵選單）。<br>
 → [更新記錄](/apatw-ui-block.user.js.CHANGES.md)
+
+
+
+[ClearURLs]: https://docs.clearurls.xyz/1.27.3/
