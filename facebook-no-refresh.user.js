@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              Facebook 不要自動重新整理
 // @description       抵抗臉書首頁（動態消息）自動重整的行為
-// @version           1.1.0
+// @version           1.2.0
 // @license           MIT
 // @author            bootleq
 // @namespace         bootleq.com
@@ -22,6 +22,11 @@ const gFeedStaleTimeout = 48 * hours; // 動態消息過期（隨後會自動重
 const gLoadInterval = 10;         // 等待 FB 啟動（以符合預期條件）期間，重試間隔（毫秒）
 const gLoadTimeout = 8 * seconds; // 等待 FB 啟動（以符合預期條件）的最大時間，超過就放棄執行功能
 const gMessagePrefix = 'FB-R';    // 使用 console.log 時的固定訊息開頭，R for Refresh
+
+const targetFBConstants = [
+  'CometFeedStalenessConstantsEntryPointVariables',
+  'CometFeedStalenessConstants',
+]
 
 // Although `@grant none` seems enough to access FB window directly,
 // on Firefox we can't inject script to "page" due to CSP.
@@ -73,7 +78,18 @@ const getRequireFunction = () => (typeof pageWin.require === 'function');
 
 const delayFeedStale = () => {
   try {
-    const m = pageWin.require('CometFeedStalenessConstants');
+    let varName = '';
+    let m;
+
+    for (let idx = 0; idx < targetFBConstants.length; idx++) {
+      const name = targetFBConstants[idx];
+      const required = pageWin.require(name);
+      if (typeof required === 'object') {
+        varName = name;
+        m = required;
+        break;
+      }
+    }
 
     if (
       typeof m !== 'object' ||
@@ -81,7 +97,7 @@ const delayFeedStale = () => {
       typeof m.FEED_VISIBILITY_TIMEOUT !== 'number' ||
       typeof m.BADGE_STALE_TIMEOUT !== 'number'
     ) {
-      throw new Error('Unexpected shape of CometFeedStalenessConstants');
+      throw new Error('Unexpected shape of FB constant');
     }
 
     const oldValue = JSON.stringify(m);
@@ -89,7 +105,7 @@ const delayFeedStale = () => {
     m.FEED_VISIBILITY_TIMEOUT = gFeedStaleTimeout;
     // m.FEED_MAX_QUERY_AGE_IN_SEC = gFeedStaleTimeout;
     m.BADGE_STALE_TIMEOUT = gFeedStaleTimeout;
-    log(`CometFeedStalenessConstants updated:\n  ${oldValue} =>\n  ${JSON.stringify(m)}.`);
+    log(`${varName} updated:\n  ${oldValue} =>\n  ${JSON.stringify(m)}.`);
   } catch (error) {
     showFailureMsg();
     log('delayFeedStale failed:', error);
