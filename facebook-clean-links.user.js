@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           Facebook 乾淨連結
 // @description    清除臉書為外部連結附加的轉址等處理
-// @version        1.0.0
+// @version        1.0.1
 // @license        MIT
 // @author         bootleq
 // @namespace      bootleq.com
@@ -52,9 +52,12 @@ function cleanupURL(url) {
   const u = new URL(url);
   const search = u.search;
 
+  // Real link is in the ?u=foo part
   if (/^lm?.facebook.com$/i.test(u.hostname) && u.pathname === '/l.php' && u.search.startsWith('?u=')) {
     const newHref = decodeURIComponent(u.href.match(/u=([^&#$]+)/i)[1]);
-    return cleanupURL(newHref);
+    if (newHref.startsWith('https://')) {
+      return cleanupURL(newHref);
+    }
   }
 
   for (const paramName of unwantedParams) {
