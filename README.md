@@ -45,6 +45,13 @@
 | [更新記錄](/twreporter-user.user.js.CHANGES.md)
 
 
+## Blogger 清理貼圖冗碼
+
+轉換 Blogger 文章編輯（HTML 檢視）「插入圖片」功能預設插入的 HTML 程式碼<br>
+已知問題：在 Firefox 上由於 CSP 限制，從文章列表進入編輯頁面時無法啟動，解法是進入編輯後再重載<br>
+→ [更新記錄](/blogger-insert-image-cleaner.user.js.CHANGES.md)
+
+
 ## APATW UI 解鎖
 
 解開 APATW（中華民國保護動物協會）網站對使用者操作的限制（文字選取、右鍵選單）。<br>
