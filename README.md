@@ -32,6 +32,12 @@
 | 替代方案 [ClearURLs][]
 
 
+## Facebook 鍵盤捲頁
+
+使用鍵盤 PageDown 捲動（在單篇貼文 dialog 等）<br>
+→ [更新記錄](/facebook-page-up-down.user.js.CHANGES.md)
+
+
 ## 報導者優蛇
 
 報導者介面調整：目前只有處理文章用 <kbd>PageDown</kbd> 或 <kbd>End</kbd> 有時無法捲動頁面的問題。<br>
