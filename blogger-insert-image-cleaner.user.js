@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         清理 Blogger 插入圖片冗碼
 // @description  用編輯器插入圖片後，轉換預設產生的 HTML
-// @version      0.1.0
+// @version      0.1.1
 // @license      MIT
 // @author       bootleq
 // @namespace    bootleq.com
@@ -47,12 +47,12 @@ function parseProps(html) {
     if (!imgMatch) return null;
     const imgTag = imgMatch[0];
 
-    const srcMatch = imgTag.match(/src="([^"]+)"/);
-    const widthMatch = imgTag.match(/width="(\d+)"/);
-    const heightMatch = imgTag.match(/height="(\d+)"/);
-    const originalWidthMatch = imgTag.match(/data-original-width="(\d+)"/);
-    const originalHeightMatch = imgTag.match(/data-original-height="(\d+)"/);
-    const altMatch = imgTag.match(/alt="([^"]*)"/);
+    const srcMatch = imgTag.match(/ src="([^"]+)"/);
+    const widthMatch = imgTag.match(/ width="(\d+)"/);
+    const heightMatch = imgTag.match(/ height="(\d+)"/);
+    const originalWidthMatch = imgTag.match(/ data-original-width="(\d+)"/);
+    const originalHeightMatch = imgTag.match(/ data-original-height="(\d+)"/);
+    const altMatch = imgTag.match(/ alt="([^"]*)"/);
 
     const src = srcMatch?.[1];
     const basename = extractBasename(src || '');
