@@ -2,7 +2,7 @@
 // @name              momoshop.com.tw 切換手機／電腦版
 // @description       Add link button to specific pages, to switch between mobile/desktop site
 // @description:zh-TW 在特定網頁增加連結按鈕，以切換至手機／電腦版網站
-// @version           1.1.0
+// @version           1.2.0
 // @license           MIT
 // @author            bootleq
 // @namespace         bootleq.com
@@ -18,10 +18,11 @@ const detectTP = true; // 啟用偵測 店+
 
 const TPToggleWidth = 'clamp(375px, 100vw, 960px)'; // 店+ 按下按鈕時，調整網頁內容（body 等）到指定寬度
 
-const adapterHTML = function (url, text) {
+const adapterHTML = function (url, text, note) {
+  const noteHTML = note ? `<strong>${note}</strong>` : '';
   return `
       <span>👀</span>
-      <a ${url ? `href="${url}"` : `onclick="document.documentElement.classList.toggle('${adapterClass}-tp-fix')"`}>${text}</a>
+      <a ${url ? `href="${url}"` : `onclick="document.documentElement.classList.toggle('${adapterClass}-tp-fix')"`}>${text}${noteHTML}</a>
       <button onclick="console.log(this.parentNode.style.display = 'none')">✖</button>`;
 };
 
@@ -64,12 +65,20 @@ const globalStyle = `
     color: white;
     padding: 1em 0 1em 22px;
     margin-inline: 0;
+    text-align: left;
     text-shadow: 1px 1px 1px #333;
     transition: margin 10s ease-in-out;
   }
 
   .${adapterClass} > a:active {
     margin-inline: clamp(10em, 42vw, 64em);
+  }
+
+  .${adapterClass} > a strong {
+    display: block;
+    margin-top: 0.25em;
+    color: yellow;
+    font-size: smaller;
   }
 
   .${adapterClass} > button {
@@ -144,6 +153,15 @@ const routes = {
       key:  'cn',
       to: 'categoryD',
     },
+    {
+      name: 'member',
+      path: '/mymomo/',
+    },
+    {
+      name: 'memberCenter',
+      path: '/mymomo/membercenter.momo',
+      to: 'member',
+    },
   ],
   desktop: [
     {
@@ -174,6 +192,11 @@ const routes = {
       key:  'm_code',
       to: 'category',
     },
+    {
+      name: 'member',
+      path: '/mypage/MemberCenter.jsp',
+      to: 'memberCenter',
+    },
   ]
 };
 
@@ -188,10 +211,14 @@ const findRouteByName = function (view, routeName) {
 const adapterURL = function (url, route, view) {
   const toView = view === 'mobile' ? 'desktop' : 'mobile';
   const params = url.searchParams;
+  let id;
 
-  const id = params.get(route.key);
-  if (!id) {
-    console.error(`解析網址失敗，缺少 ${route.key} 參數`);
+  if ('key' in route) {
+    id = params.get(route.key);
+    if (!id) {
+      console.error(`解析網址失敗，缺少 ${route.key} 參數`);
+      return '';
+    }
   }
 
   const toRoute = findRouteByName(toView, route.to || route.name);
@@ -201,15 +228,18 @@ const adapterURL = function (url, route, view) {
   // params.set(toRoute.key, id);
   // return `https://${hosts[toView]}${toRoute.path}?${params.toString()}`;
 
-  return `https://${hosts[toView]}${toRoute.path}?${toRoute.key}=${id}`;
+  const args = id ? `?${toRoute.key}=${id}` : '';
+
+  return `https://${hosts[toView]}${toRoute.path}${args}`;
 };
 
-const insertAdapter = function (url, view) {
+const insertAdapter = function (url, view, routeName) {
   const target = document.querySelector('body');
   const $div = document.createElement('div');
   const text = adapterText[view];
+  const note = routeName === 'member' ? '※ 只到「會員中心」首頁' : '';
 
-  $div.innerHTML = adapterHTML(url, text);
+  $div.innerHTML = adapterHTML(url, text, note);
   $div.classList.add(adapterClass);
   $div.classList.add(`${adapterClass}-view-${view}`);
   return target.appendChild($div);
@@ -248,7 +278,7 @@ const onInit = function () {
   if (route) {
     insertStyle(globalStyle);
     const newURL = adapterURL(url, route, view);
-    insertAdapter(newURL, view);
+    insertAdapter(newURL, view, route.name);
   } else {
     console.log('未支援的網址');
   }
