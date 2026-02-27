@@ -47,6 +47,7 @@ const globalStyle = `
   }
 
   .${adapterClass} > span {
+    font-size: inherit;
     animation: ${adapterClass}-blink 2800ms infinite normal;
     margin-top: -4px;
   }
@@ -65,6 +66,7 @@ const globalStyle = `
     color: white;
     padding: 1em 0 1em 22px;
     margin-inline: 0;
+    font-size: inherit;
     text-align: left;
     text-shadow: 1px 1px 1px #333;
     transition: margin 10s ease-in-out;
