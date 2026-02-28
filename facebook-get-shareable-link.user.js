@@ -160,16 +160,15 @@ GM_addStyle(`
   }
 
   #${ERROR_ID} {
-    position: 'fixed',
-    bottom: '24px',
-    right: '24px',
-    background: '#ff4444',
-    color: '#fff',
-    padding: '12px 20px',
-    borderRadius: '10px',
-    fontSize: '14px',
-    zIndex: '2147483647',
-    boxShadow: '0 4px 16px rgba(0,0,0,.2)',
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #ff4444;
+    color: #fff;
+    padding: 12px 20px;
+    borderRadius: 10px;
+    fontSize: 14px;
+    boxShadow: 0 4px 16px rgba(0,0,0,.2);
   }
 `);
 
@@ -239,6 +238,12 @@ async function onButtonClick(e) {
   $box.dataset.disabled = true;
 
   try {
+    const urlInfo = getCanonicalUrl();
+    if (!urlInfo) {
+      showError('找不到影片的標準網址（canonical URL）');
+      return;
+    }
+
     const { canonicalUrl, videoId, needLookup } = urlInfo;
 
     if (!needLookup) {
@@ -425,7 +430,7 @@ function showError(msg) {
 
   const el = document.createElement('div');
   el.id = ERROR_ID;
-  el.textContent = `❌ ${msg}`;
+  el.textContent = `錯誤：${msg}`;
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 5000);
 }
@@ -434,12 +439,5 @@ function log(...args) {
   console.log(`[${LOG_PREFIX}]`, ...args);
 }
 
-// Main process
-
-const urlInfo = getCanonicalUrl();
-if (!urlInfo) {
-  log('找不到 canonical URL');
-  return;
-}
 
 waitForInjectTarget();
