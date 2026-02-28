@@ -199,14 +199,6 @@ function getCanonicalUrl() {
   return null;
 }
 
-
-const urlInfo = getCanonicalUrl();
-if (!urlInfo) {
-  log('找不到 canonical URL');
-  return;
-}
-
-
 function injectButton($target) {
   if (document.getElementById(BUTTON_ID)) return;
 
@@ -231,9 +223,6 @@ function waitForInjectTarget(maxWait = 10000, interval = 300) {
     }
   }, interval);
 }
-
-waitForInjectTarget();
-
 
 async function onButtonClick(e) {
   const $target = e.target;
@@ -282,7 +271,6 @@ function pauseVideo() {
   }
 }
 
-
 function fetchAndShow(targetUrl) {
   return new Promise((resolve, reject) => {
     GM_xmlhttpRequest({
@@ -319,7 +307,6 @@ function fetchAndShow(targetUrl) {
     });
   });
 }
-
 
 // 產生 <dialog> 內容結構：
 //
@@ -446,3 +433,13 @@ function showError(msg) {
 function log(...args) {
   console.log(`[${LOG_PREFIX}]`, ...args);
 }
+
+// Main process
+
+const urlInfo = getCanonicalUrl();
+if (!urlInfo) {
+  log('找不到 canonical URL');
+  return;
+}
+
+waitForInjectTarget();
