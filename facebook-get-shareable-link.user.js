@@ -1,20 +1,24 @@
 // ==UserScript==
-// @name          Facebook 影片標題連結
-// @description   在臉書 video/reel 頁面顯示一顆按鈕，提供帶有完整標題、便於分享的 <a> 連結
+// @name          Facebook 影片，取得帶標題連結
+// @description   在臉書 video/reel 頁面顯示一顆按鈕，提供帶有完整標題的 <a> 連結以便分享
 // @version       1.0.0
 // @license       MIT
 // @author        bootleq
 // @namespace     bootleq.com
+// @homepageURL    https://github.com/bootleq/user-scripts
+//
 // @match         https://www.facebook.com/reel/*
 // @match         https://www.facebook.com/*/videos/*
 // @match         https://www.facebook.com/watch/*
+// @run-at        document-idle
+//
 // @grant         GM_xmlhttpRequest
 // @grant         GM_setClipboard
 // @grant         GM_addStyle
-// @run-at        document-idle
+// @noframes
 // ==/UserScript==
 
-const ID_PREFIX = 'FB_SHAREABLE';
+const ID_PREFIX = 'FB_SHAREABLE_LINK';
 const BUTTON_ID = `${ID_PREFIX}_BTN`;
 const DIALOG_ID = `${ID_PREFIX}_DIALOG`;
 const ERROR_ID  = `${ID_PREFIX}_ERROR`;
