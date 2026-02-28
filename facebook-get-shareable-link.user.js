@@ -27,6 +27,7 @@ const BG_STYLE = 'linear-gradient( 135deg, #5a1f2b 0%, #7a2d5c 40%, #a12a3a 70%,
 const BUTTON_ICON = '🍖';
 const BUTTON_TEXT = '帶標題的連結';
 const BAD_TITLES = ['Facebook', '影片'];
+const LOG_PREFIX = 'FB-VSL';    // 使用 console.log 時的固定訊息開頭，VSL for Video Share Link
 
 const buttonHTML = function () {
   return `
@@ -201,7 +202,7 @@ function getCanonicalUrl() {
 
 const urlInfo = getCanonicalUrl();
 if (!urlInfo) {
-  console.log('找不到 canonical URL');
+  log('找不到 canonical URL');
   return;
 }
 
@@ -225,7 +226,7 @@ function waitForInjectTarget(maxWait = 10000, interval = 300) {
       clearInterval(timer);
       injectButton($target);
     } else if (Date.now() - start > maxWait) {
-      console.log('找不到 BUTTON_INSERT_TO，放棄');
+      log('找不到 BUTTON_INSERT_TO，放棄');
       clearInterval(timer);
     }
   }, interval);
@@ -440,4 +441,8 @@ function showError(msg) {
   el.textContent = `❌ ${msg}`;
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 5000);
+}
+
+function log(...args) {
+  console.log(`[${LOG_PREFIX}]`, ...args);
 }
