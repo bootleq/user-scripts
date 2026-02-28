@@ -244,6 +244,7 @@ async function onButtonClick(e) {
     const { canonicalUrl, videoId, needLookup } = urlInfo;
 
     if (!needLookup) {
+      pauseVideo();
       await fetchAndShow(canonicalUrl);
     } else {
       // 需先確認頁面回傳的 canonical（從 <link rel="canonical">）
@@ -253,6 +254,8 @@ async function onButtonClick(e) {
       const target = linkCanonical
         ? linkCanonical
         : `https://www.facebook.com/video.php?v=${videoId}`;
+
+      pauseVideo();
       await fetchAndShow(target);
     }
   } catch (err) {
@@ -260,6 +263,13 @@ async function onButtonClick(e) {
   } finally {
     $text.textContent = BUTTON_TEXT;
     $box.dataset.disabled = false;
+  }
+}
+
+function pauseVideo() {
+  const $stopBtn = document.querySelector('div[role="main"] [role="button"][aria-label="暫停"]');
+  if ($stopBtn) {
+    $stopBtn.click();
   }
 }
 
