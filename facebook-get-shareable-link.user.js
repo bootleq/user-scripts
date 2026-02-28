@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name          Facebook 影片，取得帶標題連結
-// @description   在臉書 video/reel 頁面顯示一顆按鈕，提供帶有完整標題的 <a> 連結以便分享
+// @name          Facebook 影片帶標題連結
+// @description   在臉書 video/reel 頁面顯示按鈕，取得帶有完整標題的 <a> 連結以便分享
 // @version       1.0.0
 // @license       MIT
 // @author        bootleq
