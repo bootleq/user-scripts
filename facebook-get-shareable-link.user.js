@@ -58,10 +58,14 @@ GM_addStyle(`
     overflow: hidden;
     max-width: 0;
     white-space: nowrap;
-    transition: max-width 500ms ease;
+    transition: max-width 500ms ease, margin-right 10s ease-in-out;
+    margin-right: 0;
   }
   #${BUTTON_ID}:hover > div {
     max-width: 600px;
+  }
+  #${BUTTON_ID}:active > div {
+    margin-right: clamp(10em, 42vw, 64em);
   }
   #${BUTTON_ID}:not([data-disabled="true"]) {
     cursor: pointer;
