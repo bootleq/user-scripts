@@ -153,6 +153,10 @@ GM_addStyle(`
     font-size: 14px;
     cursor: pointer;
   }
+  #${DIALOG_ID} .actions button:focus-visible {
+    outline: 2px solid gold;
+    box-shadow: 0 0 3px 3px gold;
+  }
 
   #${ERROR_ID} {
     position: 'fixed',
