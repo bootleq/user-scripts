@@ -20,22 +20,63 @@ const DIALOG_ID = `${ID_PREFIX}_DIALOG`;
 const ERROR_ID  = `${ID_PREFIX}_ERROR`;
 const BUTTON_INSERT_TO = 'div[role="main"]';
 const BG_STYLE = 'linear-gradient( 135deg, #5a1f2b 0%, #7a2d5c 40%, #a12a3a 70%, #d14a6a 100%)';
-const BUTTON_TEXT = '🍖帶標題的連結';
+const BUTTON_ICON = '🍖';
+const BUTTON_TEXT = '帶標題的連結';
 const BAD_TITLES = ['Facebook', '影片'];
+
+const buttonHTML = function () {
+  return `
+      <span>${BUTTON_ICON}</span>
+      <div>
+        <span data-text>${BUTTON_TEXT}</span>
+        <button data-action='close'">✖</button>
+      </div>`;
+};
 
 GM_addStyle(`
   #${BUTTON_ID} {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
     position: absolute;
     align-self: end;
     top: 10em;
     margin-right: 0.4em;
-    padding: 6px 14px;
-    border-radius: 8px;
+    padding: 6px 9px;
+    border-radius: 16px;
     border: medium;
     box-shadow: 0 8px 40px rgba(0,0,0,.5);
     background: ${BG_STYLE};
     color: white;
+    cursor: not-allowed;
+    opacity: 0.8;
+  }
+  #${BUTTON_ID} > div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    overflow: hidden;
+    max-width: 0;
+    white-space: nowrap;
+    transition: max-width 500ms ease;
+  }
+  #${BUTTON_ID}:hover > div {
+    max-width: 600px;
+  }
+  #${BUTTON_ID}:not([data-disabled="true"]) {
     cursor: pointer;
+    opacity: 1;
+  }
+  #${BUTTON_ID} button[data-action='close'] {
+    background: none;
+    border: none;
+    padding: 0 0 0 8px;
+    font-size: smaller;
+    transform-origin: right;
+    cursor: pointer;
+  }
+  #${BUTTON_ID} button[data-action='close']:hover {
+    transform: scale(1.4);
   }
 
   #${DIALOG_ID} {
@@ -156,12 +197,12 @@ if (!urlInfo) {
 function injectButton($target) {
   if (document.getElementById(BUTTON_ID)) return;
 
-  const btn = document.createElement('button');
-  btn.id = BUTTON_ID;
-  btn.textContent = BUTTON_TEXT;
-  btn.addEventListener('click', onButtonClick);
+  const $div = document.createElement('div');
 
-  $target.appendChild(btn);
+  $div.innerHTML = buttonHTML();
+  $div.id = BUTTON_ID;
+  $div.addEventListener('click', onButtonClick);
+  return $target.appendChild($div);
 }
 
 function waitForInjectTarget(maxWait = 10000, interval = 300) {
@@ -181,10 +222,19 @@ function waitForInjectTarget(maxWait = 10000, interval = 300) {
 waitForInjectTarget();
 
 
-async function onButtonClick() {
-  const btn = document.getElementById(BUTTON_ID);
-  btn.textContent = '⏳ 取得中…';
-  btn.disabled = true;
+async function onButtonClick(e) {
+  const $target = e.target;
+  const $box = document.getElementById(BUTTON_ID);
+  const $closeBtn = $target.closest("[data-action='close']");
+
+  if ($closeBtn) {
+    $box.style.display = 'none';
+    return;
+  }
+
+  const $text = $box.querySelector('span[data-text]');
+  $text.textContent = '⏳ 取得中…';
+  $box.dataset.disabled = true;
 
   try {
     const { canonicalUrl, videoId, needLookup } = urlInfo;
@@ -204,8 +254,8 @@ async function onButtonClick() {
   } catch (err) {
     showError(err.message);
   } finally {
-    btn.textContent = BUTTON_TEXT;
-    btn.disabled = false;
+    $text.textContent = BUTTON_TEXT;
+    $box.dataset.disabled = false;
   }
 }
 
@@ -259,7 +309,7 @@ function showModal({ url, title }) {
   const content = document.createElement('div');
 
   const h2 = document.createElement('h2');
-  h2.textContent = BUTTON_TEXT;
+  h2.textContent = `${BUTTON_ICON} ${BUTTON_TEXT}`;
 
   const urlDisplay = document.createElement('code');
   urlDisplay.textContent = url;
