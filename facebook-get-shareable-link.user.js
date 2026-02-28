@@ -316,8 +316,36 @@ function fetchAndShow(targetUrl) {
 }
 
 
-// 樣板：
+// 產生 <dialog> 內容結構：
 //
+// <div>
+//   <h2>🍖 帶標題的連結</h2>
+//   <ul>
+//     <li>
+//       <strong>URL</strong>
+//       <div>
+//         <code>...{URL}...</code>
+//       </div>
+//     </li>
+//     <li>
+//       <strong>標題</strong>
+//       <div>
+//         <textarea>...{title}...</textarea>
+//       </div>
+//     </li>
+//     <li>
+//       <strong>預覽</strong><div>
+//       <div>
+//         <div data-preview>
+//           <a href="...{URL}..." title="...{title}...">...{title}...</a>
+//         </div>
+//       </div>
+//     </li>
+//   </ul>
+//   <div class="actions">
+//     <button autofocus="">複製</button>
+//   </div>
+// </div>
 function showModal({ url, title }) {
   document.getElementById(DIALOG_ID)?.remove();
 
