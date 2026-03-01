@@ -27,6 +27,8 @@ const BUTTON_TEXT = '帶標題的連結';
 const BAD_TITLES = ['Facebook', '影片'];
 const LOG_PREFIX = 'FB-VSL';    // 使用 console.log 時的固定訊息開頭，VSL for Video Share Link
 
+let $menu;
+
 const buttonHTML = function () {
   return `
       <span>${BUTTON_ICON}</span>
@@ -57,6 +59,10 @@ GM_addStyle(`
     opacity: 0.8;
     anchor-name: --user-${ID_PREFIX}-button-anchor;
   }
+  #${BUTTON_ID}.dragover {
+    outline: 2px solid gold;
+    box-shadow: 0 0 3px 3px gold;
+  }
   #${BUTTON_ID} > div {
     display: flex;
     flex-direction: row;
@@ -68,7 +74,8 @@ GM_addStyle(`
     margin-right: 0;
   }
   #${BUTTON_ID}:hover > div,
-  #${BUTTON_ID}.waiting > div {
+  #${BUTTON_ID}.waiting > div,
+  #${BUTTON_ID}.dragover > div {
     max-width: 600px;
   }
   #${BUTTON_ID}:active > div {
@@ -220,6 +227,12 @@ function injectButton($target) {
   $div.innerHTML = buttonHTML();
   $div.id = BUTTON_ID;
   $div.addEventListener('click', onButtonClick);
+  $div.addEventListener('dragenter', onDragEnter);
+  $div.addEventListener('dragleave', onDragLeave);
+  $div.addEventListener('dragover', onDragOver);
+  $div.addEventListener('drop', onDrop);
+
+  $menu = $div;
   return $target.prepend($div);
 }
 
@@ -255,6 +268,49 @@ async function onButtonClick(e) {
 
   $box.classList.toggle('waiting');
   return;
+}
+
+function canDrop(e) {
+  const types = e.dataTransfer.types;
+  return types.includes('text/plain') || types.includes('text/uri-list');
+}
+
+function onDragEnter(e) {
+  if (canDrop(e) && $menu === e.target && !$menu.contains(e.relatedTarget)) {
+    $menu.classList.add('dragover');
+  }
+}
+
+function onDragLeave(e) {
+  if ($menu === e.target && !$menu.contains(e.relatedTarget)) {
+    $menu.classList.remove('dragover');
+  }
+}
+
+function onDragOver(e) {
+  if (canDrop(e)) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'link';
+  }
+}
+
+async function onDrop(e) {
+  if (!canDrop) return;
+
+  e.preventDefault();
+  $menu.classList.remove('dragover');
+
+  const dText = e.dataTransfer.getData('text/plain');
+  const dUrl  = e.dataTransfer.getData('text/uri-list');
+  const url = dUrl || dText;
+
+  try {
+    const parsed = new URL(url);
+    // TODO: fetch parsed url
+    await onFetch();
+  } catch (error) {
+    showError(`解析 URL 失敗（${JSON.stringify(url)}）`);
+  }
 }
 
 async function onFetch() {
@@ -464,6 +520,5 @@ function showError(msg) {
 function log(...args) {
   console.log(`[${LOG_PREFIX}]`, ...args);
 }
-
 
 waitForInjectTarget();
