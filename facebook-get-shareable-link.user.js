@@ -193,27 +193,26 @@ GM_addStyle(`
   }
 `);
 
-function getCanonicalUrl() {
-  const { pathname, search } = location;
+function getCanonicalUrl(url) {
+  let match;
+  const { pathname, search } = url;
 
   // /reel/{id}
-  const reelMatch = pathname.match(/^\/reel\/(\d+)/);
-  if (reelMatch) {
-    return { videoId: reelMatch[1], canonicalUrl: null, needLookup: true };
+  match = pathname.match(/^\/reel\/(\d+)/);
+  if (match) {
+    return `https://www.facebook.com/video.php?v=${match[1]}`;
   }
 
   // /watch/?v={id}
-  const watchParams = new URLSearchParams(search);
-  const watchId = watchParams.get('v');
-  if (pathname === '/watch/' || pathname === '/watch') {
-    return { videoId: watchId, canonicalUrl: null, needLookup: true };
+  match = pathname.match(/^\/watch\/(\d+)/);
+  if (match) {
+    return `https://www.facebook.com/video.php?v=${match[1]}`;
   }
 
-  // /{page}/videos/{id}/
-  const videoMatch = pathname.match(/^\/(.+)\/videos\/(\d+)/);
-  if (videoMatch) {
-    const canonical = `https://www.facebook.com${pathname}`;
-    return { videoId: videoMatch[2], canonicalUrl: canonical, needLookup: false };
+  // /{user}/videos/{id}/
+  match = pathname.match(/^\/(?:[^\/]+)\/videos\/(\d+)/);
+  if (match) {
+    return `https://www.facebook.com/video.php?v=${match[1]}`;
   }
 
   return null;
@@ -252,21 +251,21 @@ function waitForInjectTarget(maxWait = 10000, interval = 300) {
 
 async function onButtonClick(e) {
   const $target = e.target;
-  const $box = document.getElementById(BUTTON_ID);
 
   const $closeBtn = $target.closest("[data-action='close']");
   if ($closeBtn) {
-    $box.style.display = 'none';
+    $menu.style.display = 'none';
     return;
   }
 
   const $currentUrlBtn = $target.closest("[data-action='current-url']");
   if ($currentUrlBtn) {
-    await onFetch();
+    const url = new URL(window.location)
+    await onFetch(url);
     return;
   }
 
-  $box.classList.toggle('waiting');
+  $menu.classList.toggle('waiting');
   return;
 }
 
@@ -306,43 +305,26 @@ async function onDrop(e) {
 
   try {
     const parsed = new URL(url);
-    // TODO: fetch parsed url
-    await onFetch();
+    await onFetch(parsed);
   } catch (error) {
     showError(`解析 URL 失敗（${JSON.stringify(url)}）`);
   }
 }
 
-async function onFetch() {
+async function onFetch(url) {
   const $box = document.getElementById(BUTTON_ID);
   const $text = $box.querySelector('span[data-text]');
   $text.textContent = '⏳ 取得中…';
   $box.dataset.disabled = true;
 
   try {
-    const urlInfo = getCanonicalUrl();
-    if (!urlInfo) {
-      showError('找不到影片的標準網址（canonical URL）');
+    const canonicalUrl = getCanonicalUrl(url);
+    if (!canonicalUrl) {
+      showError('找不到標準網址（canonical URL）');
       return;
     }
-
-    const { canonicalUrl, videoId, needLookup } = urlInfo;
-
-    if (!needLookup) {
-      pauseVideo();
-      await fetchAndShow(canonicalUrl);
-    } else {
-      // 需先確認頁面回傳的 canonical（從 <link rel="canonical">）
-      // 或直接用 videoId 組出 /videos/ URL 嘗試
-      // 先嘗試從當前頁面 canonical meta 取得
-      const linkCanonical = document.querySelector('link[rel="canonical"]')?.href;
-      const target = linkCanonical
-        ? linkCanonical
-        : `https://www.facebook.com/video.php?v=${videoId}`;
-
-      pauseVideo();
-      await fetchAndShow(target);
-    }
+    pauseVideo();
+    await fetchAndShow(canonicalUrl);
   } catch (err) {
     showError(err.message);
   } finally {
