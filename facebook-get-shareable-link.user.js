@@ -7,9 +7,7 @@
 // @namespace     bootleq.com
 // @homepageURL    https://github.com/bootleq/user-scripts
 //
-// @match         https://www.facebook.com/reel/*
-// @match         https://www.facebook.com/*/videos/*
-// @match         https://www.facebook.com/watch/*
+// @match         https://www.facebook.com/*
 // @run-at        document-idle
 //
 // @grant         GM_xmlhttpRequest
@@ -22,7 +20,7 @@ const ID_PREFIX = 'FB_SHAREABLE_LINK';
 const BUTTON_ID = `${ID_PREFIX}_BTN`;
 const DIALOG_ID = `${ID_PREFIX}_DIALOG`;
 const ERROR_ID  = `${ID_PREFIX}_ERROR`;
-const BUTTON_INSERT_TO = 'div[role="main"]';
+const BUTTON_INSERT_TO = '[role="banner"] [role="navigation"][aria-label="帳號控制項和設定"]';
 const BG_STYLE = 'linear-gradient( 135deg, #5a1f2b 0%, #7a2d5c 40%, #a12a3a 70%, #d14a6a 100%)';
 const BUTTON_ICON = '🍖';
 const BUTTON_TEXT = '帶標題的連結';
@@ -43,13 +41,11 @@ GM_addStyle(`
     display: flex;
     flex-direction: row;
     align-items: center;
-    position: absolute;
-    align-self: end;
     top: 10em;
-    margin-right: 0.4em;
-    padding: 6px 9px;
+    margin-right: 9px;
+    padding: 6px;
     border-radius: 16px;
-    border: medium;
+    border: 1px solid darkred;
     box-shadow: 0 8px 40px rgba(0,0,0,.5);
     background: ${BG_STYLE};
     color: white;
@@ -79,7 +75,7 @@ GM_addStyle(`
   #${BUTTON_ID} button[data-action='close'] {
     background: none;
     border: none;
-    padding: 0 0 0 8px;
+    padding: 0 2px 0 8px;
     font-size: smaller;
     transform-origin: right;
     cursor: pointer;
@@ -206,7 +202,7 @@ function injectButton($target) {
   $div.innerHTML = buttonHTML();
   $div.id = BUTTON_ID;
   $div.addEventListener('click', onButtonClick);
-  return $target.appendChild($div);
+  return $target.prepend($div);
 }
 
 function waitForInjectTarget(maxWait = 10000, interval = 300) {
