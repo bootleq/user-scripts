@@ -33,7 +33,11 @@ const buttonHTML = function () {
       <div>
         <span data-text>${BUTTON_TEXT}</span>
         <button data-action='close'">✖</button>
-      </div>`;
+      </div>
+      <button data-action='current-url'>
+        使用目前網址
+      </button>
+    `;
 };
 
 GM_addStyle(`
@@ -51,6 +55,7 @@ GM_addStyle(`
     color: white;
     cursor: not-allowed;
     opacity: 0.8;
+    anchor-name: --user-${ID_PREFIX}-button-anchor;
   }
   #${BUTTON_ID} > div {
     display: flex;
@@ -62,7 +67,8 @@ GM_addStyle(`
     transition: max-width 500ms ease, margin-right 10s ease-in-out;
     margin-right: 0;
   }
-  #${BUTTON_ID}:hover > div {
+  #${BUTTON_ID}:hover > div,
+  #${BUTTON_ID}.waiting > div {
     max-width: 600px;
   }
   #${BUTTON_ID}:active > div {
@@ -82,6 +88,18 @@ GM_addStyle(`
   }
   #${BUTTON_ID} button[data-action='close']:hover {
     transform: scale(1.4);
+  }
+  #${BUTTON_ID} button[data-action='current-url'] {
+    display: none;
+    position: fixed;
+    top: anchor(bottom);
+    justify-self: anchor-center;
+    margin-top: 5px;
+    position-anchor: --user-${ID_PREFIX}-button-anchor;
+    cursor: pointer;
+  }
+  #${BUTTON_ID}.waiting button[data-action='current-url'] {
+    display: block;
   }
 
   #${DIALOG_ID} {
@@ -222,13 +240,25 @@ function waitForInjectTarget(maxWait = 10000, interval = 300) {
 async function onButtonClick(e) {
   const $target = e.target;
   const $box = document.getElementById(BUTTON_ID);
-  const $closeBtn = $target.closest("[data-action='close']");
 
+  const $closeBtn = $target.closest("[data-action='close']");
   if ($closeBtn) {
     $box.style.display = 'none';
     return;
   }
 
+  const $currentUrlBtn = $target.closest("[data-action='current-url']");
+  if ($currentUrlBtn) {
+    await onFetch();
+    return;
+  }
+
+  $box.classList.toggle('waiting');
+  return;
+}
+
+async function onFetch() {
+  const $box = document.getElementById(BUTTON_ID);
   const $text = $box.querySelector('span[data-text]');
   $text.textContent = '⏳ 取得中…';
   $box.dataset.disabled = true;
