@@ -41,8 +41,8 @@ const buttonHTML = function () {
         <span data-text>${BUTTON_TEXT}</span>
         <button data-action='close'">✖</button>
       </div>
-      <button data-action='current-url'>
-        使用目前網址
+      <button data-action='current-post'>
+        偵測目前內容
       </button>
     `;
 };
@@ -105,7 +105,7 @@ GM_addStyle(`
   #${BUTTON_ID} button[data-action='close']:hover {
     transform: scale(1.4);
   }
-  #${BUTTON_ID} button[data-action='current-url'] {
+  #${BUTTON_ID} button[data-action='current-post'] {
     display: none;
     position: fixed;
     top: anchor(bottom);
@@ -114,7 +114,7 @@ GM_addStyle(`
     position-anchor: --user-${ID_PREFIX}-button-anchor;
     cursor: pointer;
   }
-  #${BUTTON_ID}.waiting button[data-action='current-url'] {
+  #${BUTTON_ID}.waiting button[data-action='current-post'] {
     display: block;
   }
 
@@ -203,9 +203,11 @@ GM_addStyle(`
 `);
 
 function getCanonicalUrl(url) {
-  let match;
-  const { origin, pathname, search } = url;
+  const urlObj = url instanceof URL ? url : new URL(url);
+  const { origin, pathname, search } = urlObj;
   const params = new URLSearchParams(search);
+
+  let match;
 
   // /{user}/posts/{id}
   match = pathname.match(/^\/(?:[^\/]+)\/posts\/(.+)/);
@@ -328,6 +330,35 @@ function modalDialogObserver() {
   }
 }
 
+function findTimestampLinkInDialog(dialog) {
+  const maxTry = 8;
+  const obfuscationLong = 20;
+  const link = Array.from(dialog.querySelectorAll('a[role="link"]')).slice(0, maxTry).find(node => {
+    // Assume timestamp link has quirk behavior that:
+    // 1. Has real content obfuscation, leads to innerText and textContent mismatch, and innerText got many new lines.
+    // 2. (After user mouseover,) the child element will has labelledby by another span.
+    const href = node.href || '';
+    if (href) {
+      const child = node.firstElementChild;
+      // console.log('Checking child', child, child.textContent, child.getAttribute('aria-labelledby'));
+
+      if (child) {
+        // // Assumption 1
+        const innerText = child.innerText;
+        if (innerText !== child.textContent && innerText.split('\n').length > obfuscationLong) {
+          return true;
+        }
+
+        // // Assumption 2
+        if (child.ariaLabelledByElements?.[0]) {
+          return true;
+        }
+      }
+    }
+  });
+  return link;
+}
+
 async function onButtonClick(e) {
   const $target = e.target;
 
@@ -337,9 +368,31 @@ async function onButtonClick(e) {
     return;
   }
 
-  const $currentUrlBtn = $target.closest("[data-action='current-url']");
-  if ($currentUrlBtn) {
-    const url = new URL(window.location)
+  const $currentPostBtn = $target.closest("[data-action='current-post']");
+  if ($currentPostBtn) {
+    let url = getCanonicalUrl(new URL(window.location.href));
+
+    if (!url) {
+      const dialog = Array.from(document.querySelectorAll(SELECTORS.modalDialogDetect)).find(node => node.checkVisibility())?.closest('[role="dialog"]');
+      if (dialog) {
+        const timeLink = findTimestampLinkInDialog(dialog);
+        // Still need to check if the link is ready
+        if (timeLink) {
+          const testUrl = new URL(timeLink.href);
+          if (testUrl.pathname === '/') {
+            showError('時間連結未準備好（需先滑過連結）');
+            return;
+          }
+          url = getCanonicalUrl(timeLink.href);
+        }
+      }
+    }
+
+    if (!url) {
+      showError('解析目前內容失敗');
+      return;
+    }
+
     await onFetch(url);
     $menu.classList.remove('waiting');
     return;
@@ -384,26 +437,25 @@ async function onDrop(e) {
   const url = dUrl || dText;
 
   try {
-    const parsed = new URL(url);
-    await onFetch(parsed);
+    const canonicalUrl = getCanonicalUrl(url);
+    if (!canonicalUrl) {
+      showError(`未支援這個 URL： ${url}`);
+      return;
+    }
+    await onFetch(canonicalUrl);
     $menu.classList.remove('waiting');
   } catch (error) {
     showError(`解析 URL 失敗（${JSON.stringify(url)}）`);
   }
 }
 
-async function onFetch(url) {
+async function onFetch(canonicalUrl) {
   const $box = document.getElementById(BUTTON_ID);
   const $text = $box.querySelector('span[data-text]');
   $text.textContent = '⏳ 取得中…';
   $box.dataset.disabled = true;
 
   try {
-    const canonicalUrl = getCanonicalUrl(url);
-    if (!canonicalUrl) {
-      showError('找不到標準網址（canonical URL）');
-      return;
-    }
     pauseVideo();
     await fetchAndShow(canonicalUrl);
   } catch (err) {
@@ -577,6 +629,7 @@ function showError(msg) {
   el.id = ERROR_ID;
   el.textContent = `錯誤：${msg}`;
   document.body.appendChild(el);
+  log(msg)
   setTimeout(() => el.remove(), 5000);
 }
 
