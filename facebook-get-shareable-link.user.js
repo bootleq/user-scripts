@@ -379,7 +379,11 @@ async function onButtonClick(e) {
 
   const $closeBtn = $target.closest("[data-action='close']");
   if ($closeBtn) {
-    $menu.style.display = 'none';
+    if (e.ctrlKey) {
+      $menu.style.display = 'none';
+    } else {
+      showError('請按住 Ctrl 點選關閉（防止誤擊）');
+    }
     return;
   }
 
