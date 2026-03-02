@@ -43,9 +43,12 @@ const buttonHTML = function () {
         <span data-text>${MENU_TEXT}</span>
         <button data-action='close'">✖</button>
       </div>
-      <button data-action='current-post'>
-        偵測目前內容
-      </button>
+      <div class='dropdown'>
+        <div class='desc'>拖曳連結進來，或</div>
+        <button data-action='current-post'>
+          偵測目前內容
+        </button>
+      </div>
     `;
 };
 
@@ -107,13 +110,24 @@ GM_addStyle(`
   #${MENU_ID} button[data-action='close']:hover {
     transform: scale(1.4);
   }
-  #${MENU_ID} button[data-action='current-post'] {
+  #${MENU_ID} .dropdown {
+    font-size: smaller;
     display: none;
+    flex-direction: column;
+    gap: 5px;
     position: fixed;
     top: anchor(bottom);
     justify-self: anchor-center;
-    margin-top: 5px;
+    margin-top: 2px;
     position-anchor: --user-${ID_PREFIX}-button-anchor;
+  }
+  #${MENU_ID}.waiting .dropdown {
+    display: flex;
+  }
+  #${MENU_ID} .desc {
+  }
+  #${MENU_ID} button[data-action='current-post'] {
+    font-size: inherit;
     cursor: pointer;
   }
   #${MENU_ID}.waiting button[data-action='current-post'] {
