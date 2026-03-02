@@ -452,10 +452,9 @@ async function onDrop(e) {
 }
 
 async function onFetch(canonicalUrl) {
-  const $box = document.getElementById(MENU_ID);
-  const $text = $box.querySelector('span[data-text]');
+  const $text = $menu.querySelector('span[data-text]');
   $text.textContent = '⏳ 取得中…';
-  $box.dataset.disabled = true;
+  $menu.dataset.disabled = true;
 
   try {
     pauseVideo();
@@ -464,7 +463,7 @@ async function onFetch(canonicalUrl) {
     showError(err.message);
   } finally {
     $text.textContent = MENU_TEXT;
-    $box.dataset.disabled = false;
+    $menu.dataset.disabled = false;
   }
 }
 
