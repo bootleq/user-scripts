@@ -11,7 +11,6 @@
 // @run-at        document-idle
 //
 // @grant         GM_xmlhttpRequest
-// @grant         GM_setClipboard
 // @grant         GM_addStyle
 // @noframes
 // ==/UserScript==
@@ -625,8 +624,15 @@ function showModal({ url, title }) {
     }
 
     if (target.closest('button')) {
+      const html = previewAnchor.outerHTML;
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          'text/html': new Blob([html], { type: 'text/html' }),
+          'text/plain': new Blob([html], { type: 'text/plain' }),
+        })
+      ]);
+
       copyBtn.textContent = '已複製！';
-      GM_setClipboard(previewAnchor.outerHTML, 'text');
       await new Promise(r => setTimeout(r, 1800));
       copyBtn.textContent = '複製';
     }
