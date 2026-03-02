@@ -243,9 +243,8 @@ function getCanonicalUrl(url) {
   }
 
   // /watch/?v={id}
-  match = pathname.match(/^\/watch\/(\d+)/);
-  if (match) {
-    return `https://www.facebook.com/video.php?v=${match[1]}`;
+  if (pathname === '/watch/' && params.has('v')) {
+    return `${origin}/video.php?v=${params.get('v')}`;
   }
 
   // /{user}/videos/{id}/
