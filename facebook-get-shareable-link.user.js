@@ -276,6 +276,7 @@ async function onButtonClick(e) {
   if ($currentUrlBtn) {
     const url = new URL(window.location)
     await onFetch(url);
+    $menu.classList.remove('waiting');
     return;
   }
 
@@ -320,6 +321,7 @@ async function onDrop(e) {
   try {
     const parsed = new URL(url);
     await onFetch(parsed);
+    $menu.classList.remove('waiting');
   } catch (error) {
     showError(`解析 URL 失敗（${JSON.stringify(url)}）`);
   }
