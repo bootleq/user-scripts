@@ -23,7 +23,6 @@ const ERROR_ID  = `${ID_PREFIX}_ERROR`;
 const BG_STYLE = 'linear-gradient( 135deg, #5a1f2b 0%, #7a2d5c 40%, #a12a3a 70%, #d14a6a 100%)';
 const MENU_ICON = '🍖';
 const MENU_TEXT = '帶標題的連結';
-const BAD_TITLES = ['Facebook', '影片'];
 const LOG_PREFIX = 'FB-GSL';    // 使用 console.log 時的固定訊息開頭，GSL for Get Share Link
 const SELECTORS = {
   modalDialogDetect: ':is(.__fb-light-mode, .__fb-dark-mode) [role="dialog"]:not([aria-label^="載入中"]) [role="button"][aria-label="關閉"]',
@@ -509,11 +508,6 @@ function fetchAndShow(targetUrl) {
         const title = doc.title
           ?? doc.querySelector('meta[property="og:title"]')?.content?.trim();
         // 優先採用 <title>，因 og:title 通常多出「N 次觀看· N 個心情」部分
-
-        if (!title || BAD_TITLES.includes(title)) {
-          reject(new Error(`無法取得完整標題（頁面仍回傳「${title}」）`));
-          return;
-        }
 
         showModal({ url: finalUrl, title });
         resolve();
