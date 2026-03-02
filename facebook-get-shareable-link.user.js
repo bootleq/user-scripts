@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name          Facebook 影片帶標題連結
-// @description   在臉書 video/reel 頁面顯示按鈕，取得帶有完整標題的 <a> 連結以便分享
+// @name          Facebook 取得帶標題連結
+// @description   在臉書頁面顯示按鈕，取得帶有完整標題的 <a> 連結以便分享
 // @version       1.0.0
 // @license       MIT
 // @author        bootleq
@@ -20,14 +20,16 @@ const ID_PREFIX = 'FB_SHAREABLE_LINK';
 const BUTTON_ID = `${ID_PREFIX}_BTN`;
 const DIALOG_ID = `${ID_PREFIX}_DIALOG`;
 const ERROR_ID  = `${ID_PREFIX}_ERROR`;
-const BUTTON_INSERT_TO = '[role="banner"] [role="navigation"][aria-label="帳號控制項和設定"]';
 const BG_STYLE = 'linear-gradient( 135deg, #5a1f2b 0%, #7a2d5c 40%, #a12a3a 70%, #d14a6a 100%)';
-const BUTTON_ICON = '🍖';
-const BUTTON_TEXT = '帶標題的連結';
+const MENU_ICON = '🍖';
+const MENU_TEXT = '帶標題的連結';
 const BAD_TITLES = ['Facebook', '影片'];
-const LOG_PREFIX = 'FB-VSL';    // 使用 console.log 時的固定訊息開頭，VSL for Video Share Link
+const LOG_PREFIX = 'FB-GSL';    // 使用 console.log 時的固定訊息開頭，GSL for Get Share Link
 const SELECTORS = {
-  modalDialogDetect: ':is(.__fb-light-mode, .__fb-dark-mode) [role="dialog"]:not([aria-label^="載入中"]) [role="button"][aria-label="關閉"]'
+  modalDialogDetect: ':is(.__fb-light-mode, .__fb-dark-mode) [role="dialog"]:not([aria-label^="載入中"]) [role="button"][aria-label="關閉"]',
+  insertToBanner: '[role="banner"] [role="navigation"][aria-label="帳號控制項和設定"]',
+  insertToModal: ':is(.__fb-light-mode, .__fb-dark-mode)',
+  videoPauseButton: 'div[role="main"] [role="button"][aria-label="暫停"]',
 };
 const THROTTLE_DELAY = 250;
 
@@ -36,9 +38,9 @@ let menuAttachTo = 'banner'; // 'banner' | 'modal'
 
 const buttonHTML = function () {
   return `
-      <span>${BUTTON_ICON}</span>
+      <span>${MENU_ICON}</span>
       <div>
-        <span data-text>${BUTTON_TEXT}</span>
+        <span data-text>${MENU_TEXT}</span>
         <button data-action='close'">✖</button>
       </div>
       <button data-action='current-post'>
@@ -272,12 +274,12 @@ function injectButton($target) {
 function waitForInjectTarget(maxWait = 10000, interval = 300) {
   const start = Date.now();
   const timer = setInterval(() => {
-    const $target = document.querySelector(BUTTON_INSERT_TO);
+    const $target = document.querySelector(SELECTORS.insertToBanner);
     if ($target) {
       clearInterval(timer);
       injectButton($target);
     } else if (Date.now() - start > maxWait) {
-      log('找不到 BUTTON_INSERT_TO，放棄');
+      log('找不到預期存在的 banner 元素，放棄');
       clearInterval(timer);
     }
   }, interval);
@@ -289,7 +291,7 @@ function attachMenu(knownTarget) {
   if (!$menu) {
     log('menu is gone, re-create it.')
     menuAttachTo = 'banner';
-    target = document.querySelector(BUTTON_INSERT_TO);
+    target = document.querySelector(SELECTORS.insertToBanner);
     injectButton(target);
     return;
   }
@@ -299,7 +301,7 @@ function attachMenu(knownTarget) {
       knownTarget?.appendChild($menu);
     }
   } else {
-    target = document.querySelector(BUTTON_INSERT_TO);
+    target = document.querySelector(SELECTORS.insertToBanner);
     if (target && !target.contains($menu)) {
       target.prepend($menu);
     }
@@ -311,7 +313,7 @@ function modalDialogObserver() {
   const nodes = Array.from(document.querySelectorAll(SELECTORS.modalDialogDetect));
   const dialog = nodes.find(node => node.checkVisibility())?.closest('[role="dialog"]');
   if (dialog) {
-    const target = dialog.closest(':is(.__fb-light-mode, .__fb-dark-mode)');
+    const target = dialog.closest(SELECTORS.insertToModal);
     if (target) {
       if (menuAttachTo !== 'modal') {
         menuAttachTo = 'modal';
@@ -389,7 +391,7 @@ async function onButtonClick(e) {
     }
 
     if (!url) {
-      showError('解析目前內容失敗');
+      showError('偵測失敗');
       return;
     }
 
@@ -461,13 +463,13 @@ async function onFetch(canonicalUrl) {
   } catch (err) {
     showError(err.message);
   } finally {
-    $text.textContent = BUTTON_TEXT;
+    $text.textContent = MENU_TEXT;
     $box.dataset.disabled = false;
   }
 }
 
 function pauseVideo() {
-  const $stopBtn = document.querySelector('div[role="main"] [role="button"][aria-label="暫停"]');
+  const $stopBtn = document.querySelector(SELECTORS.videoPauseButton);
   if ($stopBtn) {
     $stopBtn.click();
   }
@@ -549,7 +551,7 @@ function showModal({ url, title }) {
   const content = document.createElement('div');
 
   const h2 = document.createElement('h2');
-  h2.textContent = `${BUTTON_ICON} ${BUTTON_TEXT}`;
+  h2.textContent = `${MENU_ICON} ${MENU_TEXT}`;
 
   const urlDisplay = document.createElement('code');
   urlDisplay.textContent = url;
@@ -612,7 +614,7 @@ function showModal({ url, title }) {
     }
 
     if (target.closest('button')) {
-      copyBtn.textContent = '✅ 已複製！';
+      copyBtn.textContent = '已複製！';
       GM_setClipboard(previewAnchor.outerHTML, 'text');
       await new Promise(r => setTimeout(r, 1800));
       copyBtn.textContent = '複製';
