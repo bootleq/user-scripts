@@ -26,8 +26,13 @@ const BUTTON_ICON = '🍖';
 const BUTTON_TEXT = '帶標題的連結';
 const BAD_TITLES = ['Facebook', '影片'];
 const LOG_PREFIX = 'FB-VSL';    // 使用 console.log 時的固定訊息開頭，VSL for Video Share Link
+const SELECTORS = {
+  modalDialogDetect: ':is(.__fb-light-mode, .__fb-dark-mode) [role="dialog"]:not([aria-label^="載入中"]) [role="button"][aria-label="關閉"]'
+};
+const THROTTLE_DELAY = 250;
 
 let $menu;
+let menuAttachTo = 'banner'; // 'banner' | 'modal'
 
 const buttonHTML = function () {
   return `
@@ -58,6 +63,10 @@ GM_addStyle(`
     cursor: not-allowed;
     opacity: 0.8;
     anchor-name: --user-${ID_PREFIX}-button-anchor;
+  }
+  #${BUTTON_ID}[data-attach-to="modal"] {
+    position: fixed;
+    right: 0;
   }
   #${BUTTON_ID}.dragover {
     outline: 2px solid gold;
@@ -239,11 +248,20 @@ function injectButton($target) {
 
   $div.innerHTML = buttonHTML();
   $div.id = BUTTON_ID;
+  $div.dataset.attachTo = menuAttachTo;
   $div.addEventListener('click', onButtonClick);
   $div.addEventListener('dragenter', onDragEnter);
   $div.addEventListener('dragleave', onDragLeave);
   $div.addEventListener('dragover', onDragOver);
   $div.addEventListener('drop', onDrop);
+
+  // Prevent trigger modal dialog closing (when attached to modal)
+  ['pointerdown'].forEach((event) => {
+    $div.addEventListener(event, (e) => {
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+    });
+  });
 
   $menu = $div;
   return $target.prepend($div);
@@ -261,6 +279,53 @@ function waitForInjectTarget(maxWait = 10000, interval = 300) {
       clearInterval(timer);
     }
   }, interval);
+}
+
+function attachMenu(knownTarget) {
+  let target;
+
+  if (!$menu) {
+    log('menu is gone, re-create it.')
+    menuAttachTo = 'banner';
+    target = document.querySelector(BUTTON_INSERT_TO);
+    injectButton(target);
+    return;
+  }
+
+  if (menuAttachTo === 'modal') {
+    if (knownTarget.checkVisibility()) {
+      knownTarget?.appendChild($menu);
+    }
+  } else {
+    target = document.querySelector(BUTTON_INSERT_TO);
+    if (target && !target.contains($menu)) {
+      target.prepend($menu);
+    }
+  }
+  $menu.dataset.attachTo = menuAttachTo;
+}
+
+function modalDialogObserver() {
+  const nodes = Array.from(document.querySelectorAll(SELECTORS.modalDialogDetect));
+  const dialog = nodes.find(node => node.checkVisibility())?.closest('[role="dialog"]');
+  if (dialog) {
+    const target = dialog.closest(':is(.__fb-light-mode, .__fb-dark-mode)');
+    if (target) {
+      if (menuAttachTo !== 'modal') {
+        menuAttachTo = 'modal';
+        setTimeout(() => {
+          attachMenu(target);
+        }, 300);
+      }
+    }
+  } else {
+    if (menuAttachTo !== 'banner') {
+      menuAttachTo = 'banner';
+      setTimeout(() => {
+        attachMenu();
+      }, 300);
+    }
+  }
 }
 
 async function onButtonClick(e) {
@@ -515,8 +580,30 @@ function showError(msg) {
   setTimeout(() => el.remove(), 5000);
 }
 
+function throttle(func, delay) {
+  let timer = null;
+  return (...args) => {
+    if (timer) return;
+
+    timer = setTimeout(() => {
+      func.apply(this, args);
+      timer = null;
+    }, delay);
+  };
+};
+
 function log(...args) {
   console.log(`[${LOG_PREFIX}]`, ...args);
 }
 
 waitForInjectTarget();
+
+const throttledDialogObserver = throttle(modalDialogObserver, THROTTLE_DELAY);
+const observer = new MutationObserver(throttledDialogObserver);
+observer.observe(
+  document.body,
+  {
+    childList: true,
+    subtree: true
+  }
+);
