@@ -17,7 +17,7 @@
 // ==/UserScript==
 
 const ID_PREFIX = 'FB_SHAREABLE_LINK';
-const BUTTON_ID = `${ID_PREFIX}_BTN`;
+const MENU_ID = `${ID_PREFIX}_BTN`;
 const DIALOG_ID = `${ID_PREFIX}_DIALOG`;
 const ERROR_ID  = `${ID_PREFIX}_ERROR`;
 const BG_STYLE = 'linear-gradient( 135deg, #5a1f2b 0%, #7a2d5c 40%, #a12a3a 70%, #d14a6a 100%)';
@@ -50,7 +50,7 @@ const buttonHTML = function () {
 };
 
 GM_addStyle(`
-  #${BUTTON_ID} {
+  #${MENU_ID} {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -66,15 +66,15 @@ GM_addStyle(`
     opacity: 0.8;
     anchor-name: --user-${ID_PREFIX}-button-anchor;
   }
-  #${BUTTON_ID}[data-attach-to="modal"] {
+  #${MENU_ID}[data-attach-to="modal"] {
     position: fixed;
     right: 0;
   }
-  #${BUTTON_ID}.dragover {
+  #${MENU_ID}.dragover {
     outline: 2px solid gold;
     box-shadow: 0 0 3px 3px gold;
   }
-  #${BUTTON_ID} > div {
+  #${MENU_ID} > div {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -84,19 +84,19 @@ GM_addStyle(`
     transition: max-width 500ms ease, margin-right 10s ease-in-out;
     margin-right: 0;
   }
-  #${BUTTON_ID}:hover > div,
-  #${BUTTON_ID}.waiting > div,
-  #${BUTTON_ID}.dragover > div {
+  #${MENU_ID}:hover > div,
+  #${MENU_ID}.waiting > div,
+  #${MENU_ID}.dragover > div {
     max-width: 600px;
   }
-  #${BUTTON_ID}:active > div {
+  #${MENU_ID}:active > div {
     margin-right: clamp(10em, 42vw, 64em);
   }
-  #${BUTTON_ID}:not([data-disabled="true"]) {
+  #${MENU_ID}:not([data-disabled="true"]) {
     cursor: pointer;
     opacity: 1;
   }
-  #${BUTTON_ID} button[data-action='close'] {
+  #${MENU_ID} button[data-action='close'] {
     background: none;
     border: none;
     padding: 0 2px 0 8px;
@@ -104,10 +104,10 @@ GM_addStyle(`
     transform-origin: right;
     cursor: pointer;
   }
-  #${BUTTON_ID} button[data-action='close']:hover {
+  #${MENU_ID} button[data-action='close']:hover {
     transform: scale(1.4);
   }
-  #${BUTTON_ID} button[data-action='current-post'] {
+  #${MENU_ID} button[data-action='current-post'] {
     display: none;
     position: fixed;
     top: anchor(bottom);
@@ -116,7 +116,7 @@ GM_addStyle(`
     position-anchor: --user-${ID_PREFIX}-button-anchor;
     cursor: pointer;
   }
-  #${BUTTON_ID}.waiting button[data-action='current-post'] {
+  #${MENU_ID}.waiting button[data-action='current-post'] {
     display: block;
   }
 
@@ -246,12 +246,12 @@ function getCanonicalUrl(url) {
 }
 
 function injectButton($target) {
-  if (document.getElementById(BUTTON_ID)) return;
+  if (document.getElementById(MENU_ID)) return;
 
   const $div = document.createElement('div');
 
   $div.innerHTML = buttonHTML();
-  $div.id = BUTTON_ID;
+  $div.id = MENU_ID;
   $div.dataset.attachTo = menuAttachTo;
   $div.addEventListener('click', onButtonClick);
   $div.addEventListener('dragenter', onDragEnter);
@@ -452,7 +452,7 @@ async function onDrop(e) {
 }
 
 async function onFetch(canonicalUrl) {
-  const $box = document.getElementById(BUTTON_ID);
+  const $box = document.getElementById(MENU_ID);
   const $text = $box.querySelector('span[data-text]');
   $text.textContent = '⏳ 取得中…';
   $box.dataset.disabled = true;
