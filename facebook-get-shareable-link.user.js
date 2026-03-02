@@ -195,7 +195,21 @@ GM_addStyle(`
 
 function getCanonicalUrl(url) {
   let match;
-  const { pathname, search } = url;
+  const { origin, pathname, search } = url;
+  const params = new URLSearchParams(search);
+
+  // /{user}/posts/{id}
+  match = pathname.match(/^\/(?:[^\/]+)\/posts\/(.+)/);
+  if (match) {
+    return `${origin}${pathname}`;
+  }
+
+  // /groups/{group}/?multi_permalinks={id}
+  match = pathname.match(/^\/groups\/(?:[^\/]+)\//);
+  if (match && params.has('multi_permalinks')) {
+    const postId = params.get('multi_permalinks');
+    return `${origin}${pathname}posts/${postId}`;
+  }
 
   // /reel/{id}
   match = pathname.match(/^\/reel\/(\d+)/);
