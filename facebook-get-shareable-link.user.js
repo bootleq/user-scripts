@@ -34,7 +34,7 @@ const THROTTLE_DELAY = 250;
 let $menu;
 let menuAttachTo = 'banner'; // 'banner' | 'modal'
 
-const buttonHTML = function () {
+const menuHTML = function () {
   return `
       <span>${MENU_ICON}</span>
       <div>
@@ -261,10 +261,10 @@ function injectButton($target) {
 
   const $div = document.createElement('div');
 
-  $div.innerHTML = buttonHTML();
+  $div.innerHTML = menuHTML();
   $div.id = MENU_ID;
   $div.dataset.attachTo = menuAttachTo;
-  $div.addEventListener('click', onButtonClick);
+  $div.addEventListener('click', onClick);
   $div.addEventListener('dragenter', onDragEnter);
   $div.addEventListener('dragleave', onDragLeave);
   $div.addEventListener('dragover', onDragOver);
@@ -372,7 +372,7 @@ function findTimestampLinkInDialog(dialog) {
   return link;
 }
 
-async function onButtonClick(e) {
+async function onClick(e) {
   const $target = e.target;
 
   const $closeBtn = $target.closest("[data-action='close']");
