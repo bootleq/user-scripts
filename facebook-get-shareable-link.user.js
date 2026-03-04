@@ -229,6 +229,12 @@ function getCanonicalUrl(url) {
     return `${origin}${pathname}`;
   }
 
+  // /groups/{group}/posts/{id}
+  match = pathname.match(/^\/groups\/(?:[^\/]+)\/posts\/(.+)/);
+  if (match) {
+    return `${origin}${pathname}`;
+  }
+
   // /groups/{group}/?multi_permalinks={id}
   match = pathname.match(/^\/groups\/(?:[^\/]+)\//);
   if (match && params.has('multi_permalinks')) {
@@ -396,17 +402,21 @@ async function onClick(e) {
         // Still need to check if the link is ready
         if (timeLink) {
           const testUrl = new URL(timeLink.href);
-          if (testUrl.pathname === '/') {
+          if (testUrl.pathname === window.location.pathname) {
             showError('時間連結未準備好（需先滑過連結）');
             return;
           }
           url = getCanonicalUrl(timeLink.href);
         }
+        if (!url) {
+          showError('找不到框內的「時間」連結');
+          return;
+        }
       }
     }
 
     if (!url) {
-      showError('偵測失敗');
+      showError(`偵測失敗，網址不是單篇文章`);
       return;
     }
 
