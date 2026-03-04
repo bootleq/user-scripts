@@ -8,6 +8,7 @@
 // @homepageURL    https://github.com/bootleq/user-scripts
 //
 // @match         https://www.facebook.com/*
+// @exclude-match https://www.facebook.com/privacy/*
 // @run-at        document-idle
 //
 // @grant         GM_xmlhttpRequest
