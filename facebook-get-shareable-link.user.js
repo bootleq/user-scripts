@@ -23,6 +23,7 @@ const ERROR_ID  = `${ID_PREFIX}_ERROR`;
 const BG_STYLE = 'linear-gradient( 135deg, #5a1f2b 0%, #7a2d5c 40%, #a12a3a 70%, #d14a6a 100%)';
 const MENU_ICON = '🍖';
 const MENU_TEXT = '帶標題的連結';
+const BAD_TITLES = ['Facebook', '影片'];
 const LOG_PREFIX = 'FB-GSL';    // 使用 console.log 時的固定訊息開頭，GSL for Get Share Link
 const SELECTORS = {
   modalDialogDetect: ':is(.__fb-light-mode, .__fb-dark-mode) [role="dialog"]:not([aria-label^="載入中"]) [role="button"][aria-label="關閉"]',
@@ -421,7 +422,8 @@ async function onClick(e) {
       return;
     }
 
-    await onFetch(url);
+    const originalTitle = document.title;
+    await onFetch(url, originalTitle);
     $menu.classList.remove('waiting');
     return;
   }
@@ -470,21 +472,22 @@ async function onDrop(e) {
       showError(`未支援這個 URL： ${url}`);
       return;
     }
-    await onFetch(canonicalUrl);
+    const originalTitle = document.title;
+    await onFetch(canonicalUrl, originalTitle);
     $menu.classList.remove('waiting');
   } catch (error) {
     showError(`解析 URL 失敗（${JSON.stringify(url)}）`);
   }
 }
 
-async function onFetch(canonicalUrl) {
+async function onFetch(canonicalUrl, fallbackTitle) {
   const $text = $menu.querySelector('span[data-text]');
   $text.textContent = '⏳ 取得中…';
   $menu.dataset.disabled = true;
 
   try {
     pauseVideo();
-    await fetchAndShow(canonicalUrl);
+    await fetchAndShow(canonicalUrl, fallbackTitle);
   } catch (err) {
     showError(err.message);
   } finally {
@@ -500,7 +503,7 @@ function pauseVideo() {
   }
 }
 
-function fetchAndShow(targetUrl) {
+function fetchAndShow(targetUrl, fallbackTitle) {
   return new Promise((resolve, reject) => {
     GM_xmlhttpRequest({
       method: 'GET',
@@ -518,9 +521,14 @@ function fetchAndShow(targetUrl) {
 
         const finalUrl = resp.finalUrl ?? targetUrl;
         const doc = new DOMParser().parseFromString(resp.responseText, 'text/html');
-        const title = doc.title
+        let title = doc.title
           ?? doc.querySelector('meta[property="og:title"]')?.content?.trim();
         // 優先採用 <title>，因 og:title 通常多出「N 次觀看· N 個心情」部分
+
+        // GET 取得頁面可能是錯誤（權限問題等），取不到 title 則使用原值
+        if (BAD_TITLES.includes(title)) {
+          title = fallbackTitle;
+        }
 
         showModal({ url: finalUrl, title });
         resolve();
