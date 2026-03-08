@@ -24,6 +24,8 @@ const BG_STYLE = 'linear-gradient( 135deg, #5a1f2b 0%, #7a2d5c 40%, #a12a3a 70%,
 const MENU_ICON = '🍖';
 const MENU_TEXT = '帶標題的連結';
 const BAD_TITLES = ['Facebook', '影片'];
+const BAD_PATTERNS = [/ on Reels$/];
+const BAD_MSG = '🦴☠️ 只找到預設標題，可能需手動探索才能發現文字敘述（如果有的話）';
 const LOG_PREFIX = 'FB-GSL';    // 使用 console.log 時的固定訊息開頭，GSL for Get Share Link
 const SELECTORS = {
   modalDialogDetect: ':is(.__fb-light-mode, .__fb-dark-mode) [role="dialog"]:not([aria-label^="載入中"]) [role="button"][aria-label="關閉"]',
@@ -183,6 +185,12 @@ GM_addStyle(`
     background-color: white;
     color: black;
     padding: 2px 4px;
+  }
+  #${DIALOG_ID} [data-fallback-note] {
+    color: yellow;
+    padding: 2px;
+    margin-top: 8px;
+    margin-left: -9px;
   }
   #${DIALOG_ID} .actions {
     display: flex;
@@ -523,14 +531,16 @@ function fetchAndShow(targetUrl, fallbackTitle) {
         const doc = new DOMParser().parseFromString(resp.responseText, 'text/html');
         let title = doc.title
           ?? doc.querySelector('meta[property="og:title"]')?.content?.trim();
+        let isFallback = false;
         // 優先採用 <title>，因 og:title 通常多出「N 次觀看· N 個心情」部分
 
         // GET 取得頁面可能是錯誤（權限問題等），取不到 title 則使用原值
-        if (BAD_TITLES.includes(title)) {
+        if (BAD_TITLES.includes(title) || BAD_PATTERNS.some(ptn => ptn.test(title))) {
           title = fallbackTitle;
+          isFallback = true;
         }
 
-        showModal({ url: finalUrl, title });
+        showModal({ url: finalUrl, title, isFallback });
         resolve();
       },
       onerror() {
@@ -566,11 +576,14 @@ function fetchAndShow(targetUrl, fallbackTitle) {
 //       </div>
 //     </li>
 //   </ul>
+//   <div data-fallback-note>
+//     🦴☠️ 只找到預設標題，可能需手動探索才能發現文字敘述（如果有的話）
+//   </div>
 //   <div class="actions">
 //     <button autofocus="">複製</button>
 //   </div>
 // </div>
-function showModal({ url, title }) {
+function showModal({ url, title, isFallback = false }) {
   document.getElementById(DIALOG_ID)?.remove();
 
   const dialog = document.createElement('dialog');
@@ -595,6 +608,10 @@ function showModal({ url, title }) {
   const previewAnchorBox = document.createElement('div');
   previewAnchorBox.dataset.preview = '';
   previewAnchorBox.appendChild(previewAnchor);
+
+  const fallback = document.createElement('div');
+  fallback.dataset.fallbackNote = '';
+  fallback.textContent = BAD_MSG;
 
   const items = [
     ['URL',  urlDisplay],
@@ -627,7 +644,7 @@ function showModal({ url, title }) {
   actions.className = 'actions';
   actions.appendChild(copyBtn);
 
-  content.append(h2, ul, actions);
+  content.append(h2, ul, ...(isFallback ? [fallback] : []), actions);
   dialog.append(content);
 
   document.body.appendChild(dialog);
