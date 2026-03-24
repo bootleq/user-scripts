@@ -38,9 +38,9 @@
 → [更新記錄](/facebook-page-up-down.user.js.CHANGES.md)
 
 
-## Facebook 影片帶標題連結
+## Facebook 取得帶標題連結
 
-在 video/reel 頁面顯示按鈕，取得帶有完整標題的 `<a>` 連結以便分享<br>
+顯示按鈕，用來取得帶有完整標題的 `<a>` 連結以便分享<br>
 → [更新記錄](/facebook-get-shareable-link.user.js.CHANGES.md)
 
 
