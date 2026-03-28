@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name          Facebook 取得帶標題連結
 // @description   在臉書頁面顯示按鈕，取得帶有完整標題的 <a> 連結以便分享
-// @version       2.0.0
+// @version       2.1.0
 // @license       MIT
 // @author        bootleq
 // @namespace     bootleq.com
@@ -266,7 +266,7 @@ function getCanonicalUrl(url) {
   // /{user}/videos/{id}/
   match = pathname.match(/^\/(?:[^\/]+)\/videos\/(\d+)/);
   if (match) {
-    return `https://www.facebook.com/video.php?v=${match[1]}`;
+    return `${origin}${match[0]}/`;
   }
 
   return null;
