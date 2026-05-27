@@ -100,12 +100,13 @@ const delayFeedStale = () => {
       throw new Error('Unexpected shape of FB constant');
     }
 
-    const oldValue = JSON.stringify(m);
+    const oldValue = JSON.stringify(m, null, 2);
     m.FEED_STALE_TIMEOUT = gFeedStaleTimeout;
     m.FEED_VISIBILITY_TIMEOUT = gFeedStaleTimeout;
     // m.FEED_MAX_QUERY_AGE_IN_SEC = gFeedStaleTimeout;
     m.BADGE_STALE_TIMEOUT = gFeedStaleTimeout;
-    log(`${varName} updated:\n  ${oldValue} =>\n  ${JSON.stringify(m)}.`);
+
+    log(`${varName} updated:\n  ${oldValue} =>\n  ${JSON.stringify(m, null, 2)}.`);
   } catch (error) {
     showFailureMsg();
     log('delayFeedStale failed:', error);
