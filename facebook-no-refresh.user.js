@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              Facebook 不要自動重新整理
 // @description       抵抗臉書首頁（動態消息）自動重整的行為
-// @version           1.2.0
+// @version           1.3.0
 // @license           MIT
 // @author            bootleq
 // @namespace         bootleq.com
@@ -100,12 +100,30 @@ const delayFeedStale = () => {
       throw new Error('Unexpected shape of FB constant');
     }
 
-    const oldValue = JSON.stringify(m);
+    // Memo: content of the constant at 2026-05-27:
+    //
+    // "FEED_STALE_TIMEOUT":                                     600000   =>  172800000
+    // "FEED_VISIBILITY_TIMEOUT":                                120000   =>  172800000
+    // "FEED_STALE_PUSH_VIEW_TIMEOUT":                           60000    =>  172800000
+    // "FEED_STALE_PUSH_VIEW_REFRESH_THROTTLE_THRESHOLD_IN_SEC": 300
+    // "FEED_STALE_PUSH_VIEW_REFRESH_SEEN_EDGES_TO_PRESERVE":    0
+    // "FEED_STALE_PUSH_VIEW_PIN_SOURCE_EDGE":                   true
+    // "FEED_STALE_PUSH_VIEW_PIN_SOURCE_EDGE_THRESHOLD":         1800000
+    // "FEED_STALE_PUSH_VIEW_PIN_SOURCE_EDGE_COUNT":             2
+    // "FEED_MAX_QUERY_AGE_IN_SEC":                              180
+    // "BADGE_STALE_TIMEOUT":                                    600000   =>  172800000
+    // "STALE_REFRESH_MODE":                                     "AUTO"
+
+    const oldValue = JSON.stringify(m, null, 2);
     m.FEED_STALE_TIMEOUT = gFeedStaleTimeout;
     m.FEED_VISIBILITY_TIMEOUT = gFeedStaleTimeout;
     // m.FEED_MAX_QUERY_AGE_IN_SEC = gFeedStaleTimeout;
     m.BADGE_STALE_TIMEOUT = gFeedStaleTimeout;
-    log(`${varName} updated:\n  ${oldValue} =>\n  ${JSON.stringify(m)}.`);
+
+    // When quit from modal dialog, this seems to prevent subsequent stories from being removed.
+    m.FEED_STALE_PUSH_VIEW_TIMEOUT = gFeedStaleTimeout;
+
+    log(`${varName} updated:\n  ${oldValue} =>\n  ${JSON.stringify(m, null, 2)}.`);
   } catch (error) {
     showFailureMsg();
     log('delayFeedStale failed:', error);
