@@ -100,6 +100,20 @@ const delayFeedStale = () => {
       throw new Error('Unexpected shape of FB constant');
     }
 
+    // Memo: content of the constant at 2026-05-27:
+    //
+    // "FEED_STALE_TIMEOUT":                                     600000   =>  172800000
+    // "FEED_VISIBILITY_TIMEOUT":                                120000   =>  172800000
+    // "FEED_STALE_PUSH_VIEW_TIMEOUT":                           60000
+    // "FEED_STALE_PUSH_VIEW_REFRESH_THROTTLE_THRESHOLD_IN_SEC": 300
+    // "FEED_STALE_PUSH_VIEW_REFRESH_SEEN_EDGES_TO_PRESERVE":    0
+    // "FEED_STALE_PUSH_VIEW_PIN_SOURCE_EDGE":                   true
+    // "FEED_STALE_PUSH_VIEW_PIN_SOURCE_EDGE_THRESHOLD":         1800000
+    // "FEED_STALE_PUSH_VIEW_PIN_SOURCE_EDGE_COUNT":             2
+    // "FEED_MAX_QUERY_AGE_IN_SEC":                              180
+    // "BADGE_STALE_TIMEOUT":                                    600000   =>  172800000
+    // "STALE_REFRESH_MODE":                                     "AUTO"
+
     const oldValue = JSON.stringify(m, null, 2);
     m.FEED_STALE_TIMEOUT = gFeedStaleTimeout;
     m.FEED_VISIBILITY_TIMEOUT = gFeedStaleTimeout;
