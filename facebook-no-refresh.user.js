@@ -104,7 +104,7 @@ const delayFeedStale = () => {
     //
     // "FEED_STALE_TIMEOUT":                                     600000   =>  172800000
     // "FEED_VISIBILITY_TIMEOUT":                                120000   =>  172800000
-    // "FEED_STALE_PUSH_VIEW_TIMEOUT":                           60000
+    // "FEED_STALE_PUSH_VIEW_TIMEOUT":                           60000    =>  172800000
     // "FEED_STALE_PUSH_VIEW_REFRESH_THROTTLE_THRESHOLD_IN_SEC": 300
     // "FEED_STALE_PUSH_VIEW_REFRESH_SEEN_EDGES_TO_PRESERVE":    0
     // "FEED_STALE_PUSH_VIEW_PIN_SOURCE_EDGE":                   true
@@ -119,6 +119,9 @@ const delayFeedStale = () => {
     m.FEED_VISIBILITY_TIMEOUT = gFeedStaleTimeout;
     // m.FEED_MAX_QUERY_AGE_IN_SEC = gFeedStaleTimeout;
     m.BADGE_STALE_TIMEOUT = gFeedStaleTimeout;
+
+    // When quit from modal dialog, this seems to prevent subsequent stories from being removed.
+    m.FEED_STALE_PUSH_VIEW_TIMEOUT = gFeedStaleTimeout;
 
     log(`${varName} updated:\n  ${oldValue} =>\n  ${JSON.stringify(m, null, 2)}.`);
   } catch (error) {
