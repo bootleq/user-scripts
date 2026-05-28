@@ -28,6 +28,13 @@ const targetFBConstants = [
   'CometFeedStalenessConstants',
 ]
 
+const targetPaths = [
+  '/',
+  '/permalink.php',
+  /^\/groups\//,
+  /^\/(?:[^\/]+)\/posts\/(.+)/,
+];
+
 // Although `@grant none` seems enough to access FB window directly,
 // on Firefox we can't inject script to "page" due to CSP.
 // That's why still need to try wrappedJSObject.
@@ -135,9 +142,26 @@ const onNavigate = () => {
     return;
   }
 
-  if (window.location.pathname === '/') {
-    isHomeVisited = true;
+  const pathname = window.location.pathname;
 
+  for (let idx = 0; idx < targetPaths.length; idx++) {
+    const cond = targetPaths[idx];
+    if (typeof cond === 'string') {
+      if (pathname === cond) {
+        isHomeVisited = true;
+        break;
+      }
+    } else if (Object.prototype.toString.call(cond) === '[object RegExp]') {
+      if (cond.test(pathname)) {
+        isHomeVisited = true;
+        break;
+      }
+    } else {
+      throw new Error(`Unexpected targetPaths member: ${cond}`);
+    }
+  }
+
+  if (isHomeVisited) {
     waitFor(getRequireFunction, gLoadInterval, gLoadTimeout).then(delayFeedStale);
 
     if ('navigation' in pageWin) {
