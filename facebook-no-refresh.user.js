@@ -40,7 +40,7 @@ const targetPaths = [
 // That's why still need to try wrappedJSObject.
 // https://github.com/violentmonkey/violentmonkey/issues/1001
 const pageWin = ('wrappedJSObject' in window) ? window.wrappedJSObject : window;
-let isHomeVisited = false;
+let isTargetPathVisited = false;
 
 const log = (...args) => {
   console.log(`[${gMessagePrefix}]`, ...args);
@@ -138,7 +138,7 @@ const delayFeedStale = () => {
 };
 
 const onNavigate = () => {
-  if (isHomeVisited) {
+  if (isTargetPathVisited) {
     return;
   }
 
@@ -148,12 +148,12 @@ const onNavigate = () => {
     const cond = targetPaths[idx];
     if (typeof cond === 'string') {
       if (pathname === cond) {
-        isHomeVisited = true;
+        isTargetPathVisited = true;
         break;
       }
     } else if (Object.prototype.toString.call(cond) === '[object RegExp]') {
       if (cond.test(pathname)) {
-        isHomeVisited = true;
+        isTargetPathVisited = true;
         break;
       }
     } else {
@@ -161,7 +161,7 @@ const onNavigate = () => {
     }
   }
 
-  if (isHomeVisited) {
+  if (isTargetPathVisited) {
     waitFor(getRequireFunction, gLoadInterval, gLoadTimeout).then(delayFeedStale);
 
     if ('navigation' in pageWin) {
@@ -210,7 +210,7 @@ const showFailureMsg = () => {
 
 onNavigate();
 
-if (!isHomeVisited) {
+if (!isTargetPathVisited) {
   // Though auto-refresh only occur on News Feed,
   // watch navigation for case that enter "/" from other paths like "/help".
   watchNavigation();
