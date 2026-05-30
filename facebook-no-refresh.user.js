@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              Facebook 不要自動重新整理
 // @description       抵抗臉書首頁（動態消息）自動重整的行為
-// @version           1.3.0
+// @version           1.4.0
 // @license           MIT
 // @author            bootleq
 // @namespace         bootleq.com
@@ -28,12 +28,19 @@ const targetFBConstants = [
   'CometFeedStalenessConstants',
 ]
 
+const targetPaths = [
+  '/',
+  '/permalink.php',
+  /^\/groups\//,
+  /^\/(?:[^\/]+)\/posts\/(.+)/,
+];
+
 // Although `@grant none` seems enough to access FB window directly,
 // on Firefox we can't inject script to "page" due to CSP.
 // That's why still need to try wrappedJSObject.
 // https://github.com/violentmonkey/violentmonkey/issues/1001
 const pageWin = ('wrappedJSObject' in window) ? window.wrappedJSObject : window;
-let isHomeVisited = false;
+let isTargetPathVisited = false;
 
 const log = (...args) => {
   console.log(`[${gMessagePrefix}]`, ...args);
@@ -131,13 +138,30 @@ const delayFeedStale = () => {
 };
 
 const onNavigate = () => {
-  if (isHomeVisited) {
+  if (isTargetPathVisited) {
     return;
   }
 
-  if (window.location.pathname === '/') {
-    isHomeVisited = true;
+  const pathname = window.location.pathname;
 
+  for (let idx = 0; idx < targetPaths.length; idx++) {
+    const cond = targetPaths[idx];
+    if (typeof cond === 'string') {
+      if (pathname === cond) {
+        isTargetPathVisited = true;
+        break;
+      }
+    } else if (Object.prototype.toString.call(cond) === '[object RegExp]') {
+      if (cond.test(pathname)) {
+        isTargetPathVisited = true;
+        break;
+      }
+    } else {
+      throw new Error(`Unexpected targetPaths member: ${cond}`);
+    }
+  }
+
+  if (isTargetPathVisited) {
     waitFor(getRequireFunction, gLoadInterval, gLoadTimeout).then(delayFeedStale);
 
     if ('navigation' in pageWin) {
@@ -186,7 +210,7 @@ const showFailureMsg = () => {
 
 onNavigate();
 
-if (!isHomeVisited) {
+if (!isTargetPathVisited) {
   // Though auto-refresh only occur on News Feed,
   // watch navigation for case that enter "/" from other paths like "/help".
   watchNavigation();
