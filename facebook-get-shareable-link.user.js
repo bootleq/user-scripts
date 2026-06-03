@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name          Facebook 取得帶標題連結
 // @description   在臉書頁面顯示按鈕，取得帶有完整標題的 <a> 連結以便分享
-// @version       2.1.0
+// @version       2.1.1
 // @license       MIT
 // @author        bootleq
 // @namespace     bootleq.com
@@ -158,6 +158,9 @@ GM_addStyle(`
     color: white;
     margin-bottom: 6px;
   }
+  #${DIALOG_ID} code {
+    word-wrap: anywhere;
+  }
   #${DIALOG_ID} ul {
     display: flex;
     flex-direction: column;
@@ -237,6 +240,11 @@ function getCanonicalUrl(url) {
   match = pathname.match(/^\/(?:[^\/]+)\/posts\/(.+)/);
   if (match) {
     return `${origin}${pathname}`;
+  }
+
+  // permalink.php?story_fbid={fbid}&id={id}
+  if (pathname === '/permalink.php' && params.has('story_fbid') && params.has('id')) {
+    return `${origin}${pathname}?story_fbid=${params.get('story_fbid')}&id=${params.get('id')}`;
   }
 
   // /groups/{group}/posts/{id}

@@ -1,6 +1,10 @@
 CHANGES
 =======
 
+## 2.1.1 (2026-06-03)
+
+* 補上對 <code>/permalink.php?</code> 連結格式的支援
+
 ## 2.1.0 (2026-03-28)
 
 * 影片連結含有 user 部分時，保留原貌，而非轉為 <code>video.php/?v={id}</code> 格式
