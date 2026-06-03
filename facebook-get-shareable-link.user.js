@@ -239,6 +239,11 @@ function getCanonicalUrl(url) {
     return `${origin}${pathname}`;
   }
 
+  // permalink.php?story_fbid={fbid}&id={id}
+  if (pathname === '/permalink.php' && params.has('story_fbid') && params.has('id')) {
+    return `${origin}${pathname}?story_fbid=${params.get('story_fbid')}&id=${params.get('id')}`;
+  }
+
   // /groups/{group}/posts/{id}
   match = pathname.match(/^\/groups\/(?:[^\/]+)\/posts\/(.+)/);
   if (match) {
