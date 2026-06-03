@@ -158,6 +158,9 @@ GM_addStyle(`
     color: white;
     margin-bottom: 6px;
   }
+  #${DIALOG_ID} code {
+    word-wrap: anywhere;
+  }
   #${DIALOG_ID} ul {
     display: flex;
     flex-direction: column;
